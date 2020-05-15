@@ -1,5 +1,7 @@
 from socket import*
 import threading as th
+
+
 serverName=''
 serverPort=12000
 card=['묵','찌','빠']
