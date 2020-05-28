@@ -12,6 +12,7 @@ PORT = 9999
 class RSPClient:
     def __init__(self, manager):
         self.manager = manager
+        print('Welecome to RSP game!')
 
     def check_retry(self):
         while 1:
@@ -25,7 +26,7 @@ class RSPClient:
             else:
                 print('You wrote wrong answer')
 
-    def input_player_card():
+    def input_player_card(self):
         player_card=input('Write your card within 5 seconds:')
         check_time()
         if check_time==-1:
@@ -42,24 +43,29 @@ class RSPClient:
                 clientSocket.send(lose_card.encode())
                 return -1
 
+    def makePlayerName(self):
+            player_name=input('Enter your name:')
+            print('Your name is',player_name)
+            check_player=input('Is it right? yes or no:')
+            if check_player=='yes':
+                self.manager.makeConnection()
+                #연결 실패시 프로그램 종료 연결 성공시 이름을 전송
+                clientSocket.send(player_name.encode())
+                return True
+            else:
+                return False
+
+
 
 
 
 def main():
     while 1:
-        print('Welecome RSP game!')
+        manager = ClientConnectionManager(HOST, PORT)
+        clinet = RSPClient(manager)
 
         while 1: # 이름 전송
-            player_name=input('Enter your name:')
-            print('Your name is',player_name)
-            check_player=input('Is it right? yes or no:')
-            if check_player=='yes':
-                print('Connecting...')
-                clientSocket=socket(AF_INET,SOCK_STREAM)
-                clientSocket.connect((serverName,serverPort))
-                #연결 실패시 프로그램 종료 연결 성공시 이름을 전송
-                clientSocket.send(player_name.encode())
-                break
+
 
         while 1:
             #플레이어의 패를 확인
