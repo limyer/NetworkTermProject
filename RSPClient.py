@@ -3,50 +3,131 @@ import threading as th
 from ClientConnectionManager import *
 from ClientTimer import *
 import tkinter as tk
+from tkinter import font  as tkfont 
 
-lose_code='lose'
-code=0
+# lose_code='lose'
+# code=0
 
 HOST = '127.0.0.1'
 PORT = 12000
 
-class RSPClient:
-    def __init__(self, window):
-        self.window = window
-        self.window.title('RSP Game')
-        self.window.geometry("640x400+100+100")
 
-    def getHOSTPORT(self):
-        welcomeLabel=tk.Label(self.window, text="Welcome to RSP game.")
+class RSPClient(tk.Tk):
+
+    def __init__(self, *args, **kwargs):
+        tk.Tk.__init__(self, *args, **kwargs)
+
+        self.title_font = tkfont.Font(family='Helvetica', size=18, weight="bold", slant="italic")
+        self.title("RSP Game")
+
+        # the container is where we'll stack a bunch of frames
+        # on top of each other, then the one we want visible
+        # will be raised above the others
+        container = tk.Frame(self)
+        container.pack(side="top", fill="both", expand=True)
+        container.grid_rowconfigure(0, weight=1)
+        container.grid_columnconfigure(0, weight=1)
+
+
+        self.frames = {}
+        for F in (StartPage, ConnectionPage, PageTwo):
+            page_name = F.__name__
+            frame = F(parent=container, controller=self)
+            self.frames[page_name] = frame
+
+            # put all of the pages in the same location;
+            # the one on the top of the stacking order
+            # will be the one that is visible.
+            frame.grid(row=0, column=0, sticky="nsew")
+
+        self.show_frame("StartPage")
+
+    def show_frame(self, page_name):
+        '''Show a frame for the given page name'''
+        frame = self.frames[page_name]
+        frame.tkraise()
+
+
+class StartPage(tk.Frame):
+
+    def __init__(self, parent, controller):
+        tk.Frame.__init__(self, parent)
+        self.controller = controller
+
+        welcomeLabel=tk.Label(self, text="Welcome to RSP game.")
         welcomeLabel.pack()
 
-        informLabel=tk.Label(self.window, text="Type server IP address and PORT number to connect")
+        informLabel=tk.Label(self, text="Type server IP address and PORT number")
         informLabel.pack()
 
-        IPInput = tk.Entry(self.window, width=50 )
+        IPInput = tk.Entry(self, width=50 )
         IPInput.insert(0,HOST)
         IPInput.pack()
 
-        portInput = tk.Entry(self.window, width=50)
+        portInput = tk.Entry(self, width=50)
         portInput.insert(0,PORT)
         portInput.pack()
 
-        connectButton = tk.Button(self.window, text="Connect", overrelief="solid", width=15, repeatdelay=1000, repeatinterval=100)
+        usernameLabel=tk.Label(self, text="Type username")
+        usernameLabel.pack()
+
+        usernameInput = tk.Entry(self, width=50)
+        usernameInput.pack()
+
+        connectButton = tk.Button(self, text="Connect", command=lambda: controller.show_frame("ConnectionPage"), overrelief="solid", width=15, repeatdelay=1000, repeatinterval=100)
+        connectButton.bind("<Enter>", lambda: controller.show_frame("ConnectionPage"))
         connectButton.pack()
 
 
+class ConnectionPage(tk.Frame):
 
-    def check_retry(self):
-        while 1:
-            ifCheck=input('Do you want to start a new game? Yes or No')
-            if ifCheck=='Yes':
-                return 0
-                break
-            elif ifCheck=='No':
-                return -1
-                break
-            else:
-                print('You wrote wrong answer')
+    def __init__(self, parent, controller):
+        tk.Frame.__init__(self, parent)
+        self.controller = controller
+        label = tk.Label(self, text="Connecting", font=controller.title_font)
+        label.pack(side="top", fill="x", pady=10)
+        button = tk.Button(self, text="Go to the start page",
+                           command=lambda: controller.show_frame("StartPage"))
+        button.pack()
+
+
+class PageTwo(tk.Frame):
+
+    def __init__(self, parent, controller):
+        tk.Frame.__init__(self, parent)
+        self.controller = controller
+        label = tk.Label(self, text="This is page 2", font=controller.title_font)
+        label.pack(side="top", fill="x", pady=10)
+        button = tk.Button(self, text="Go to the start page",
+                           command=lambda: controller.show_frame("StartPage"))
+        button.pack()
+
+
+
+
+
+
+
+
+
+if __name__== "__main__":
+    app = RSPClient()
+    app.mainloop()
+
+
+
+
+    # def check_retry(self):
+    #     while 1:
+    #         ifCheck=input('Do you want to start a new game? Yes or No')
+    #         if ifCheck=='Yes':
+    #             return 0
+    #             break
+    #         elif ifCheck=='No':
+    #             return -1
+    #             break
+    #         else:
+    #             print('You wrote wrong answer')
 
     # def input_player_card(self):
     #     player_card=input('Write your card within 5 seconds:')
@@ -76,16 +157,6 @@ class RSPClient:
     #             return True
     #         else:
     #             return False
-
-
-
-
-
-def main():
-    window = tk.Tk()
-    client = RSPClient(window)
-    client.getHOSTPORT()
-    client.window.mainloop()
 
     # while 1:
     #     manager = ClientConnectionManager(HOST, PORT)
@@ -160,7 +231,3 @@ def main():
     #     elif code==0:
     #         clientSocket.close()
     #         continue
-
-
-if __name__ == '__main__':
-	main()
