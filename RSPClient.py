@@ -75,7 +75,7 @@ class StartPage(tk.Frame):
         usernameInput.pack()
 
         connectButton = tk.Button(self, text="Connect", command=lambda: controller.show_frame("ConnectionPage"), overrelief="solid", width=15, repeatdelay=1000, repeatinterval=100)
-        connectButton.bind("<Enter>", lambda: controller.show_frame("ConnectionPage"))
+        usernameInput.bind("<Enter>", lambda: controller.show_frame("ConnectionPage"))
         connectButton.pack()
 
 
