@@ -75,12 +75,11 @@ class StartPage(tk.Frame):
         usernameInput.pack()
 
         connectButton = tk.Button(self, text="Connect", command=lambda: controller.show_frame("ConnectionPage"), overrelief="solid", width=15, repeatdelay=1000, repeatinterval=100)
-        connectButton.bind("<Enter>", lambda: controller.show_frame("ConnectionPage"))
+        connectButton.bind("<Return>", lambda: controller.show_frame("ConnectionPage"))
         connectButton.pack()
 
 
 class ConnectionPage(tk.Frame):
-
     def __init__(self, parent, controller):
         tk.Frame.__init__(self, parent)
         self.controller = controller
