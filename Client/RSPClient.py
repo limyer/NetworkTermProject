@@ -11,11 +11,15 @@ from tkinter import font  as tkfont
 HOST = '127.0.0.1'
 PORT = 12000
 
-
 class RSPClient(tk.Tk):
 
     def __init__(self, *args, **kwargs):
         tk.Tk.__init__(self, *args, **kwargs)
+        self.shared_data={
+            "username": tk.StringVar(),
+            "userHOST": tk.StringVar(),
+            "userPORT": tk.StringVar(),
+        }
 
         self.title_font = tkfont.Font(family='Helvetica', size=18, weight="bold", slant="italic")
         self.title("RSP Game")
@@ -46,6 +50,9 @@ class RSPClient(tk.Tk):
         '''Show a frame for the given page name'''
         frame = self.frames[page_name]
         frame.tkraise()
+    
+    def get_page(self, page_class):
+        return self.frames[page_class]
 
 
 class StartPage(tk.Frame):
@@ -60,31 +67,41 @@ class StartPage(tk.Frame):
         informLabel=tk.Label(self, text="Type server IP address and PORT number")
         informLabel.pack()
 
-        IPInput = tk.Entry(self, width=50 )
+        IPInput = tk.Entry(self, width=50, textvariable=self.controller.shared_data["userHOST"])
         IPInput.insert(0,HOST)
         IPInput.pack()
 
-        portInput = tk.Entry(self, width=50)
+        portInput = tk.Entry(self, width=50, textvariable=self.controller.shared_data["userPORT"])
         portInput.insert(0,PORT)
         portInput.pack()
 
         usernameLabel=tk.Label(self, text="Type username")
         usernameLabel.pack()
 
-        usernameInput = tk.Entry(self, width=50)
+        usernameInput = tk.Entry(self, width=50, textvariable=self.controller.shared_data["username"])
         usernameInput.pack()
 
+
         connectButton = tk.Button(self, text="Connect", command=lambda: controller.show_frame("ConnectionPage"), overrelief="solid", width=15, repeatdelay=1000, repeatinterval=100)
-        connectButton.bind("<Return>", lambda: controller.show_frame("ConnectionPage"))
         connectButton.pack()
+    
+
+    
 
 
 class ConnectionPage(tk.Frame):
     def __init__(self, parent, controller):
         tk.Frame.__init__(self, parent)
         self.controller = controller
+
+        username = self.controller.shared_data["username"]
+
         label = tk.Label(self, text="Connecting", font=controller.title_font)
         label.pack(side="top", fill="x", pady=10)
+
+        usernameLabel=tk.Label(self, textvariable=username)
+        usernameLabel.pack()
+
         button = tk.Button(self, text="Go to the start page",
                            command=lambda: controller.show_frame("StartPage"))
         button.pack()
