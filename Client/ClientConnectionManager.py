@@ -1,4 +1,5 @@
 from socket import  *
+import ClientTimer
 
 class ClientConnectionManager:
     def __init__(self, HOST, PORT):
@@ -6,6 +7,9 @@ class ClientConnectionManager:
         self.serverPort = PORT
     
     def makeConnection(self):
-        print('Connecting...')
         self.clientSocket = socket(AF_INET,SOCK_STREAM)
-        self.clientSocket.connect((self.serverHost,self.serverPort))
+        try:
+            self.clientSocket.connect((self.serverHost,self.serverPort))
+            return True
+        except error:
+            return False

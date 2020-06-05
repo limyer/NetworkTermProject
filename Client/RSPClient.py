@@ -19,6 +19,7 @@ class RSPClient(tk.Tk):
             "username": tk.StringVar(),
             "userHOST": tk.StringVar(),
             "userPORT": tk.StringVar(),
+            "connectionManager": None,
         }
 
         self.title_font = tkfont.Font(family='Helvetica', size=18, weight="bold", slant="italic")
@@ -82,12 +83,19 @@ class StartPage(tk.Frame):
         usernameInput.pack()
 
 
-        connectButton = tk.Button(self, text="Connect", command=lambda: controller.show_frame("ConnectionPage"), overrelief="solid", width=15, repeatdelay=1000, repeatinterval=100)
+        connectButton = tk.Button(self, text="Connect", command=self.ConnectionEstablishment , overrelief="solid", width=15, repeatdelay=1000, repeatinterval=100)
         connectButton.pack()
     
 
-    
 
+    def ConnectionEstablishment(self):
+        self.controller.shared_data["connectionManager"] = ClientConnectionManager(self.controller.shared_data["userHOST"].get(), int(self.controller.shared_data["userPORT"].get()))
+        connectionManager = self.controller.shared_data["connectionManager"]
+        if connectionManager.makeConnection():
+            self.controller.show_frame("ConnectionPage")
+        else:
+            self.controller.show_frame("PageTwo")
+            
 
 class ConnectionPage(tk.Frame):
     def __init__(self, parent, controller):
@@ -102,9 +110,14 @@ class ConnectionPage(tk.Frame):
         usernameLabel=tk.Label(self, textvariable=username)
         usernameLabel.pack()
 
-        button = tk.Button(self, text="Go to the start page",
+        button = tk.Button(self, text="Cancel",
                            command=lambda: controller.show_frame("StartPage"))
         button.pack()
+        
+
+
+
+        
 
 
 class PageTwo(tk.Frame):
