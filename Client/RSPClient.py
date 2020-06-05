@@ -20,6 +20,7 @@ class RSPClient(tk.Tk):
             "userHOST": tk.StringVar(),
             "userPORT": tk.StringVar(),
             "connectionManager": None,
+            "connected": False
         }
 
         self.title_font = tkfont.Font(family='Helvetica', size=18, weight="bold", slant="italic")
@@ -35,7 +36,7 @@ class RSPClient(tk.Tk):
 
 
         self.frames = {}
-        for F in (StartPage, ConnectionPage, PageTwo):
+        for F in (StartPage, ConnectionPage, ErrorPage, PageTwo):
             page_name = F.__name__
             frame = F(parent=container, controller=self)
             self.frames[page_name] = frame
@@ -51,6 +52,7 @@ class RSPClient(tk.Tk):
         '''Show a frame for the given page name'''
         frame = self.frames[page_name]
         frame.tkraise()
+        frame.afterRaised()
     
     def get_page(self, page_class):
         return self.frames[page_class]
@@ -93,8 +95,12 @@ class StartPage(tk.Frame):
         connectionManager = self.controller.shared_data["connectionManager"]
         if connectionManager.makeConnection():
             self.controller.show_frame("ConnectionPage")
+            self.controller.shared_data["connected"] = True
         else:
-            self.controller.show_frame("PageTwo")
+            self.controller.show_frame("ErrorPage")
+    
+    def afterRaised(self):
+        return
             
 
 class ConnectionPage(tk.Frame):
@@ -113,11 +119,25 @@ class ConnectionPage(tk.Frame):
         button = tk.Button(self, text="Cancel",
                            command=lambda: controller.show_frame("StartPage"))
         button.pack()
-        
+
+    def afterRaised(self):
+        return
 
 
 
-        
+class ErrorPage(tk.Frame):
+    def __init__(self, parent, controller):
+        tk.Frame.__init__(self, parent)
+        self.controller = controller
+        label = tk.Label(self, text="Connection Error", font=controller.title_font)
+        label.pack(side="top", fill="x", pady=10)
+        button = tk.Button(self, text="Go to the start page",
+                           command=lambda: controller.show_frame("StartPage"))
+        button.pack()
+
+    def afterRaised(self):
+        return
+
 
 
 class PageTwo(tk.Frame):
@@ -130,6 +150,9 @@ class PageTwo(tk.Frame):
         button = tk.Button(self, text="Go to the start page",
                            command=lambda: controller.show_frame("StartPage"))
         button.pack()
+    
+    def afterRaised(self):
+        return
 
 
 
