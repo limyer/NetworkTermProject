@@ -1,7 +1,6 @@
 from socket import*
 import threading as th
 from ClientConnectionManager import *
-from ClientTimer import *
 import tkinter as tk
 from tkinter import font  as tkfont 
 
@@ -10,9 +9,13 @@ from tkinter import font  as tkfont
 
 HOST = '127.0.0.1'
 PORT = 12000
+BREAKCODE = 'break'
+OKCODE = 'ok'
 
 class RSPClient(tk.Tk):
-
+# RSP 클라이언트
+# Shared_Data에 클라이언트 정보 통합 저장
+# 프레임을 만들고 Controller로 작동
     def __init__(self, *args, **kwargs):
         tk.Tk.__init__(self, *args, **kwargs)
         self.shared_data={
@@ -26,9 +29,7 @@ class RSPClient(tk.Tk):
         self.title_font = tkfont.Font(family='Helvetica', size=18, weight="bold", slant="italic")
         self.title("RSP Game")
 
-        # the container is where we'll stack a bunch of frames
-        # on top of each other, then the one we want visible
-        # will be raised above the others
+        # 컨테이너를 기반으로 위에 프레임을 쌓아 올리면서 사용
         container = tk.Frame(self)
         container.pack(side="top", fill="both", expand=True)
         container.grid_rowconfigure(0, weight=1)
@@ -41,9 +42,7 @@ class RSPClient(tk.Tk):
             frame = F(parent=container, controller=self)
             self.frames[page_name] = frame
 
-            # put all of the pages in the same location;
-            # the one on the top of the stacking order
-            # will be the one that is visible.
+            # 모든 프레임이 같은 장소에 올라감
             frame.grid(row=0, column=0, sticky="nsew")
 
         self.show_frame("StartPage")
@@ -87,8 +86,6 @@ class StartPage(tk.Frame):
 
         connectButton = tk.Button(self, text="Connect", command=self.ConnectionEstablishment , overrelief="solid", width=15, repeatdelay=1000, repeatinterval=100)
         connectButton.pack()
-    
-
 
     def ConnectionEstablishment(self):
         self.controller.shared_data["connectionManager"] = ClientConnectionManager(self.controller.shared_data["userHOST"].get(), int(self.controller.shared_data["userPORT"].get()))
@@ -98,6 +95,7 @@ class StartPage(tk.Frame):
             self.controller.shared_data["connected"] = True
         else:
             self.controller.show_frame("ErrorPage")
+            self.controller.shared_data["connected"] = False
     
     def afterRaised(self):
         return
@@ -107,6 +105,7 @@ class ConnectionPage(tk.Frame):
     def __init__(self, parent, controller):
         tk.Frame.__init__(self, parent)
         self.controller = controller
+        
 
         username = self.controller.shared_data["username"]
 
@@ -121,7 +120,23 @@ class ConnectionPage(tk.Frame):
         button.pack()
 
     def afterRaised(self):
+        connectionManager = self.controller.shared_data["connectionManager"]
+        if connectionManager.sendMessage(self.controller.shared_data["username"].get()):
+            msg = connectionManager.receiveMessage()
+            if msg == BREAKCODE:
+                self.controller.show_frame("ErrorPage")
+                self.controller.shared_data["connected"] = False
+            elif msg == OKCODE:
+                self.controller.show_frame("PageTwo")
+            else:
+                # 1초에 한번씩 재귀 수행
+                self.after(1000, self.afterRaised())
+        else:
+            self.controller.show_frame("ErrorPage")
+            self.controller.shared_data["connected"] = False
         return
+
+                    
 
 
 
@@ -153,13 +168,6 @@ class PageTwo(tk.Frame):
     
     def afterRaised(self):
         return
-
-
-
-
-
-
-
 
 
 if __name__== "__main__":
