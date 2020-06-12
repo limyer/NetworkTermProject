@@ -20,6 +20,10 @@ def socketThread():
     playerNumber=index
     index+=1
     print(f'player {playerNumber+1} connected {addr}')
+    
+    clientSocket.send('enter your name:'.encode())
+    name=clientSocket.recv(2048).decode() #이름 지정
+    print(f'player {playerNumber+1} name: {name}')
         
         
         
@@ -44,8 +48,10 @@ def RSPStage2(player1,player2,whoWon): #stage1의 리턴 0, 1을 넣는다.
     else:
         if whoWon==0:
             return 1
-        else whoWon==1:
+        elif whoWon==1:
             return 0
+        
+def RSPMain(player1,player2):
         
         
 i=0        
