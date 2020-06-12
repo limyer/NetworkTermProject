@@ -54,9 +54,12 @@ def RSPStage2(player1,player2,whoWon): #stage1의 리턴 0, 1을 넣는다.
 def RSPMain(player1,player2):
         
         
-i=0        
-while i<2:
-    t.append(threading.Thread(target=socketThread))
-    t[i].daemon=True
-    t[i].start()
-    i+=1
+
+if __name__ == '__main__':
+    i=0        
+    while i<2:
+        t.append(threading.Thread(target=socketThread))
+        t[i].daemon=True
+        t[i].start()
+        i+=1
+    RSPMain()
