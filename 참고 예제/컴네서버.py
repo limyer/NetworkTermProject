@@ -1,20 +1,5 @@
 from socket import *
 import threading
-<<<<<<< HEAD
-# 실행 시 가위바위보의 결과가 이상하게 나올때가 있음 수정 필요, 라운드 종료시 초기화 구현 필요
-host = '192.168.43.142'
-port = 12000
-round = 1
-t=[]
-# player, log, card_table, addr0, addr1 모두 클래스 안에 넣어서 해 보았으나 변화를 인식하지 못하여 전역변수로 선언
-player = []
-log=[]
-attacker = -1
-card_table = [-1,-1]
-addr0 =[]
-addr1 =[]
-index = 0
-=======
 
 host = '192.168.43.142'
 port = 12000
@@ -24,18 +9,12 @@ addr0 =[]
 addr1 =[]
 index = 0
 
->>>>>>> a9e10e3c7ecbd61a795fd93893aaedc499511bde
 class Cserver(threading.Thread):
     def __init__(self, socket):
         super().__init__()
         self.s_socket=socket
         self.myindex = -1
         self.RSP_resultboard=[['draw','win','lose'],['lose','draw','win'],['win','lose','draw']]
-<<<<<<< HEAD
-        
-=======
-
->>>>>>> a9e10e3c7ecbd61a795fd93893aaedc499511bde
     def run(self):
         global index
         self.c_socket, addr = self.s_socket.accept()
@@ -44,12 +23,8 @@ class Cserver(threading.Thread):
         addr1.append(addr[1])
         print(index)
         index += 1
-<<<<<<< HEAD
-        creat_thread(self.s_socket)
-=======
         create_thread(self.s_socket)
         # 플레이어 추가
->>>>>>> a9e10e3c7ecbd61a795fd93893aaedc499511bde
         data = self.c_recv()
         player.append(data)
         print(player)
@@ -142,34 +117,10 @@ class Cserver(threading.Thread):
                 if res == 'win':
                     return 'lose'
                         
-<<<<<<< HEAD
-                elif res == 'lose':
-                    return 'win'
-        else:
-            return -1
-    def check_card(self, data):
-        if data == b'0':
-            return 0
-        elif data == b'1':
-            return 1
-        elif data == b'2':
-            return 2
-        else:
-            return 3
-
-    def check_addr(self, addr_0, addr_1):
-        if addr_0 == addr0[0] and addr_1 == addr1[0]:
-            self.myindex = 0
-            return 0
-        else:
-            self.myindex = 1
-            return 1
-=======
                         res = self.RSP_resultboard[self.card_table[0],self.card_table[1]]
                         self.c_send(res)
                         break
         
->>>>>>> a9e10e3c7ecbd61a795fd93893aaedc499511bde
 
     def c_recv(self):
         try:
@@ -191,9 +142,6 @@ def create_thread(s_socket):
     t.append(Cserver(s_socket))
     t[index].daemon = True
     t[index].start()
-<<<<<<< HEAD
-    
-=======
 
 def check_card(data):
     if data == b'0':
@@ -211,7 +159,6 @@ def check_addr(addr_0, addr_1):
     else:
         return 1
 
->>>>>>> a9e10e3c7ecbd61a795fd93893aaedc499511bde
 s_socket = socket(AF_INET, SOCK_STREAM)
 s_socket.bind((host,port))
 s_socket.listen(1)
