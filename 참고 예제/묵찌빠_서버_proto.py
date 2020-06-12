@@ -5,7 +5,7 @@ log=[] # 로그
 count = 0
 Ip_list=[] # addr[0]
 Ip2_list=[] # addr[1]
-porb = 0
+porb = 0 # pass or break
 ques = 0 # data를 체크한다
 player_card=[-1,-1] # 0 = 먼저 온사람, 1 = 나중에 온사람
 RSP_resultboard=[['draw','win','lose'],['lose','draw','win'],['win','lose','draw']]
@@ -42,6 +42,13 @@ def threaded(client_socket, addr):
                 # 플레이어가 모이면 play코드를 보내어 다음단계로 넘어가게한다
         elif check == 2:
             client_socket.send('ok'.encode())
+                
+        
+
+        
+            
+
+        
         #send_data(data)
         
     client_socket.close() 
