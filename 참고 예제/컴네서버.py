@@ -1,15 +1,27 @@
 from socket import *
 import threading
-
+# 실행 시 가위바위보의 결과가 이상하게 나올때가 있음 수정 필요, 라운드 종료시 초기화 구현 필요
+host = '192.168.43.142'
+port = 12000
+round = 1
+t=[]
+# player, log, card_table, addr0, addr1 모두 클래스 안에 넣어서 해 보았으나 변화를 인식하지 못하여 전역변수로 선언
+player = []
+log=[]
+attacker = -1
+card_table = [-1,-1]
+addr0 =[]
+addr1 =[]
+index = 0
 class Cserver(threading.Thread):
     def __init__(self, socket):
         super().__init__()
         self.s_socket=socket
-        self.card_table = [-1,-1]
+        self.myindex = -1
         self.RSP_resultboard=[['draw','win','lose'],['lose','draw','win'],['win','lose','draw']]
+        
     def run(self):
         global index
-        # 연결
         self.c_socket, addr = self.s_socket.accept()
         print(addr[0], addr[1], '이 연결되었습니다')
         addr0.append(addr[0])
@@ -17,43 +29,119 @@ class Cserver(threading.Thread):
         print(index)
         index += 1
         creat_thread(self.s_socket)
-        # 플레이어 추가
         data = self.c_recv()
         player.append(data)
         print(player)
-        # 플레이어가 2명이면 play 전송
         while True:
             if len(player) == 2:
                 self.c_send('play')
                 break
         print('next step')
-        # step2 선후공 결정
+        self.step2(addr)
+        print('next step')
+        self.step3(addr)
+        
+        
+    def step2(self, addr):
+        # 선후공 결정
+        print(player)
         while True:
             card = self.c_recv()
-            c_card = check_card(card)
+            c_card = self.check_card(card)
             print(c_card)
-            if c_card == -1:
-                self.c_send('you lose')
+            if c_card==3:
+                # 3이면 기권패 처리, 클라에서는 버튼선택 이므로 구현 하지 않아도 된다
+                return 0
+            add=self.check_addr(addr[0], addr[1])
+            print(add)
+            card_table[add] = c_card
+            print(card_table)
+            log.append(c_card)
+            while True:
+                if len(log) == 2:
+                    break
+            res = self.check_res()
+            if res == 'draw':
+                self.send_res(res)
+                continue
+            else:
+                self.send_res(res)
+                break
+        # 카드 테이블 초기화
+        card_table[0] = -1
+        card_table[1] = -1
+            
+                
+            
+        
+    def step3(self, addr): # 라운드 승패 결정
+        add=self.check_addr(addr[0], addr[1])
+        #print(add)
+        while True:
+            card_table[0] = -1
+            card_table[1] = -1
+            card = self.c_recv()
+            c_card = self.check_card(card)
+            print(c_card)
+            card_table[add] = c_card
+            print(card_table)
+            log.append(c_card)
+            while True:
+                if len(log) % 2 == 0:
+                    print('fin break')
+                    break
+            res = self.check_res()
+            if res == 'draw':
+                self.c_send('%s win' % player[attacker])
                 break
             else:
-                num = check_addr(addr[0], addr[1])
-                self.card_table[num]=c_card
-                print('num: ',num)
+                self.send_res(res)
+    
+            
                 
-                while True:
-                    if len(self.card_table) == 2:
-                        '''에러발생 card_table[0] = 먼저온사람 card_table[1] = 나중에온사람
-                           이 위에 까지는 별 문제가 없다. 이 부분에서 에러가 났다.
-                           카드는 0,1,2 의 형태로 저장 되어있으며 0=묵,1=가위,2=보 로 저장되어있다
-                           RSP_resultboard[0][1]이면, 먼저온사람은 묵을 나중에온사람은 가위를 낸것이다.
-                           인덱스에 맞추어 결과를 저장했다.'''
+            
+    def send_res(self, res):
+        if res == 'win':
+            self.c_send('win')
+        elif res == 'draw':
+            self.c_send('draw')
+        else:
+            self.c_send('lose')
+            
+    def check_res(self):
+        if -1 not in card_table:
+            res = self.RSP_resultboard[card_table[0]][card_table[1]]
+            if res == 'win':
+                attacker = 0
+            elif res == 'lose':
+                attacker = 1
+            if self.myindex == 0:
+                return res
+            else:
+                if res == 'win':
+                    return 'lose'
                         
-                        res = self.RSP_resultboard[self.card_table[0],self.card_table[1]]
-                        self.c_send(res)
-                        break
-        
-        
-        
+                elif res == 'lose':
+                    return 'win'
+        else:
+            return -1
+    def check_card(self, data):
+        if data == b'0':
+            return 0
+        elif data == b'1':
+            return 1
+        elif data == b'2':
+            return 2
+        else:
+            return 3
+
+    def check_addr(self, addr_0, addr_1):
+        if addr_0 == addr0[0] and addr_1 == addr1[0]:
+            self.myindex = 0
+            return 0
+        else:
+            self.myindex = 1
+            return 1
 
     def c_recv(self):
         try:
@@ -75,29 +163,7 @@ def creat_thread(s_socket):
     t.append(Cserver(s_socket))
     t[index].demon = True
     t[index].start()
-
-def check_card(data):
-    if data == b'0':
-        return 0
-    elif data == b'1':
-        return 1
-    elif data == b'2':
-        return 2
-    else:
-        return -1
-
-def check_addr(addr_0, addr_1):
-    if addr_0 == addr0[0] and addr_1 == addr1[0]:
-        return 0
-    else:
-        return 1
-host = '192.168.43.142'
-port = 12000
-t=[]
-player = []
-addr0 =[]
-addr1 =[]
-index = 0
+    
 s_socket = socket(AF_INET, SOCK_STREAM)
 s_socket.bind((host,port))
 s_socket.listen(1)
