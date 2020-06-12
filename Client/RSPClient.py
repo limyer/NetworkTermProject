@@ -2,6 +2,7 @@ from socket import*
 from ClientConnectionManager import *
 import tkinter as tk
 from tkinter import font  as tkfont 
+import tkinter.ttk
 
 # lose_code='lose'
 # code=0
@@ -210,9 +211,12 @@ class GamePage(tk.Frame):
                            command=lambda: controller.show_frame("StartPage"))
         paperButton.grid(row=5, column=2, sticky="s")
 
-    
-    def afterRaised(self):
+        self.progressbar=tkinter.ttk.Progressbar(self, maximum=100, mode="determinate")
+        self.progressbar.grid(row=6, column=1, pady=5)
 
+
+    def afterRaised(self):
+        self.progressbar.start(50)
         return
 
 
