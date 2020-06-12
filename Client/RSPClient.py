@@ -1,5 +1,4 @@
 from socket import*
-import threading as th
 from ClientConnectionManager import *
 import tkinter as tk
 from tkinter import font  as tkfont 
@@ -150,7 +149,8 @@ class ConnectionPage(tk.Frame):
         print(msg)
         if msg == OKCODE:
             self.cancelThread()
-            self.controller.show_frame("PageTwo")
+            self.controller.shared_data["connectionLabel"].set("Game Starting...")
+            self.after(3000, self.controller.show_frame("GamePage"))
         elif msg == BREAKCODE:
             self.cancelThread()
             self.controller.show_frame("ErrorPage")
@@ -175,8 +175,6 @@ class ConnectionPage(tk.Frame):
         self.controller.shared_data["connectionManager"].closeSocket()
 
 
-
-
 class ErrorPage(tk.Frame):
     def __init__(self, parent, controller):
         tk.Frame.__init__(self, parent)
@@ -190,18 +188,31 @@ class ErrorPage(tk.Frame):
     def afterRaised(self):
         return
 
-class GamePage(tk.Frame):
 
+class GamePage(tk.Frame):
     def __init__(self, parent, controller):
         tk.Frame.__init__(self, parent)
         self.controller = controller
-        label = tk.Label(self, text="This is page 2", font=controller.title_font)
-        label.pack(side="top", fill="x", pady=10)
-        button = tk.Button(self, text="Go to the start page",
+        scorelabel = tk.Label(self, text="My Score 0, Enemy Score 0", font=controller.title_font, width=30)
+        scorelabel.grid(row=0, column=0, pady=10,sticky="n", rowspan=3,columnspan=3)
+        label = tk.Label(self, text="Make your choice")
+        label.grid(row=3, column=0, pady=10,sticky="n", rowspan=2,columnspan=3)
+
+        rockButton = tk.Button(self, text="Rock", width=10, height=10,
                            command=lambda: controller.show_frame("StartPage"))
-        button.pack()
+        rockButton.grid(row=5, column=0, sticky="s")
+
+        scissorsButton = tk.Button(self, text="Scissor",width=10, height=10,
+                           command=lambda: controller.show_frame("StartPage"))
+        scissorsButton.grid(row=5, column=1,sticky="s")
+
+        paperButton = tk.Button(self, text="Paper",width=10, height=10,
+                           command=lambda: controller.show_frame("StartPage"))
+        paperButton.grid(row=5, column=2, sticky="s")
+
     
     def afterRaised(self):
+
         return
 
 
