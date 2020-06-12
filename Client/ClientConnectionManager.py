@@ -12,7 +12,7 @@ class ClientConnectionManager:
     
     # 소켓을 만들고 서버와 연결
     # 타임아웃은 1초
-    def makeConnection(self):
+    def make_connection(self):
 
         try:
             self.clientSocket = socket(AF_INET, SOCK_STREAM)
@@ -25,7 +25,7 @@ class ClientConnectionManager:
 
     # 메시지 전달 함수
     # 수신 성공 여부를 Boolean 값으로 반환
-    def sendMessage(self, message):
+    def send_message(self, message):
         if self.socketMade:
             try:
                 self.clientSocket.send(message.encode())
@@ -37,7 +37,7 @@ class ClientConnectionManager:
     
     # 메시지 수신 함수
     # 수신 실패시 None 반환
-    def receiveMessage(self):
+    def receive_message(self):
         if self.socketMade:
             try:
                 msg = self.clientSocket.recv(1024)
@@ -48,7 +48,7 @@ class ClientConnectionManager:
             return None
 
     # 소켓이 만들어져 있을 경우 소켓 연결 해제 
-    def closeSocket(self):
+    def close_socket(self):
         if self.socketMade:
             self.clientSocket.close()
             self.socketMade = False

@@ -29,7 +29,11 @@ class RSPClient(tk.Tk):
             "connected": False,
             "cancelID": None,
             "count": 1,
+            "timeOutCount": tk.IntVar(),
             "connectionLabel":tk.StringVar(),
+            "score":tk.StringVar(),
+            "myScore":0,
+            "oppScore":0,
         }
 
         self.title_font = tkfont.Font(family='Helvetica', size=18, weight="bold", slant="italic")
@@ -58,7 +62,7 @@ class RSPClient(tk.Tk):
         # 주어진 페이지 이름에 맞춰 프레임 raise
         frame = self.frames[page_name]
         frame.tkraise()
-        frame.afterRaised()
+        frame.after_raised()
     
     def get_page(self, page_class):
         return self.frames[page_class]
@@ -98,14 +102,14 @@ class StartPage(tk.Frame):
         usernameInput.pack()
 
         # 연결 버튼
-        connectButton = tk.Button(self, text="Connect", command=self.ConnectionEstablishment , overrelief="solid", width=15, repeatdelay=1000, repeatinterval=100)
+        connectButton = tk.Button(self, text="Connect", command=self.connection_establishment , overrelief="solid", width=15, repeatdelay=1000, repeatinterval=100)
         connectButton.pack()
 
     # connect 버튼 눌렸을 경우 실행하는 함수
-    def ConnectionEstablishment(self):
+    def connection_establishment(self):
         self.controller.shared_data["connectionManager"] = ClientConnectionManager(self.controller.shared_data["userHOST"].get(), int(self.controller.shared_data["userPORT"].get()))
         connectionManager = self.controller.shared_data["connectionManager"]
-        if connectionManager.makeConnection():
+        if connectionManager.make_connection():
             self.controller.show_frame("ConnectionPage")
             self.controller.shared_data["connected"] = True
         else:
@@ -113,7 +117,7 @@ class StartPage(tk.Frame):
             self.controller.shared_data["connected"] = False
     
     # raise 되고 실행되는 함수
-    def afterRaised(self):
+    def after_raised(self):
         return
             
 
@@ -135,31 +139,31 @@ class ConnectionPage(tk.Frame):
 
         # 연결 취소 버튼
         button = tk.Button(self, text="Cancel",
-                           command=self.cancelConnection )
+                           command=self.cancel_connection )
         button.pack()
 
     # raise 되고 실행되는 함수
-    def afterRaised(self):
+    def after_raised(self):
         connectionManager = self.controller.shared_data["connectionManager"]
 
         count = self.controller.shared_data["count"]
         try:
             # username이 성공적으로 전달 됐을 경우
-            if connectionManager.sendMessage(self.controller.shared_data["username"].get()):
+            if connectionManager.send_message(self.controller.shared_data["username"].get()):
                 # receivercode 스레드로 재귀 실행 시작
-                self.after(1, self.receiveCode)
+                self.after(1, self.receive_code)
             # 전달 실패 시
             else:
-                self.cancelThread()
+                self.cancel_thread()
                 self.controller.show_frame("ErrorPage")
                 self.controller.shared_data["connected"] = False
             return
         except error:
-            self.cancelThread()
+            self.cancel_thread()
             return
 
     # 실제로 코드를 받으며 카운트를 재는 함수
-    def receiveCode(self):
+    def receive_code(self):
         count = self.controller.shared_data["count"]
         connectionManager = self.controller.shared_data["connectionManager"]
         username = self.controller.shared_data["username"].get()
@@ -172,44 +176,44 @@ class ConnectionPage(tk.Frame):
         print(self.controller.shared_data["count"])
 
         # 실제로 메시지 수신
-        msg = connectionManager.receiveMessage()
+        msg = connectionManager.receive_message()
         print(msg)
 
         # 서버가 두 명이 접속하여 성공했음을 알림
         if msg == OKCODE:
-            self.cancelThread()
+            self.cancel_thread()
             self.controller.shared_data["connectionLabel"].set("Game Starting...")
             # 3초 후에 게임 페이지로 이동
             self.after(3000, self.controller.show_frame("GamePage"))
         # 클라이언트가 두 명 이상이기 때문에 서버가 거부 
         elif msg == BREAKCODE:
-            self.cancelThread()
+            self.cancel_thread()
             self.controller.show_frame("ErrorPage")
             self.controller.shared_data["connected"] = False
         # 지정된 타임아웃이 아직 안되었을 경우
         elif count < TIMEOUT:
             # 타임아웃 종료까지 1초에 한번 코드를 받음
-            self.controller.shared_data["cancelID"] = self.after(1000, self.receiveCode)
+            self.controller.shared_data["cancelID"] = self.after(1000, self.receive_code)
         # 타임아웃
         else:
-            self.cancelThread()
+            self.cancel_thread()
             self.controller.show_frame("ErrorPage")
             self.controller.shared_data["connected"] = False
         return
     
     # 현재 존재하는 스레드를 끝냄
     # 타임아웃 카운트 초기화
-    def cancelThread(self):
+    def cancel_thread(self):
         if self.controller.shared_data["cancelID"] != None:
             self.after_cancel(self.controller.shared_data["cancelID"])
             self.controller.shared_data["cancelID"] = None
             self.controller.shared_data["count"] = 0
     
     # 연결 실패시 스레드를 끝내고 소켓 해제
-    def cancelConnection(self):
+    def cancel_connection(self):
         self.cancelThread()
         self.controller.show_frame("StartPage")
-        self.controller.shared_data["connectionManager"].closeSocket()
+        self.controller.shared_data["connectionManager"].close_socket()
 
 
 # 연결 에러가 발생할 경우 이동하는 페이지
@@ -228,7 +232,7 @@ class ErrorPage(tk.Frame):
         button.pack()
 
     # raise 되고 실행되는 함수
-    def afterRaised(self):
+    def after_raised(self):
         return
 
 
@@ -237,36 +241,75 @@ class GamePage(tk.Frame):
     def __init__(self, parent, controller):
         tk.Frame.__init__(self, parent)
         self.controller = controller
+        score = self.controller.shared_data["score"]
 
         # 스코어 라벨
-        scorelabel = tk.Label(self, text="My Score 0, Opponent Score 0", font=controller.title_font, width=30)
-        scorelabel.grid(row=0, column=0, pady=10,sticky="n", rowspan=3,columnspan=3)
+        scoreLabel = tk.Label(self, textvariable=score, font=controller.title_font, width=30)
+        scoreLabel.grid(row=0, column=0, pady=10,sticky="n", rowspan=3,columnspan=3)
 
         # 안내 라벨
-        label = tk.Label(self, text="Make your choice")
-        label.grid(row=3, column=0, pady=10,sticky="n", rowspan=2,columnspan=3)
+        self.informLabel = tk.Label(self, text="Make your choice")
+        self.informLabel.grid(row=3, column=0, pady=10,sticky="n", rowspan=2,columnspan=3)
 
         # 가위바위보 버튼
-        rockButton = tk.Button(self, text="Rock", width=10, height=10,
-                           command=lambda: controller.show_frame("StartPage"), repeatdelay=1000, repeatinterval=100)
-        rockButton.grid(row=5, column=0, sticky="s")
+        self.rockButton = tk.Button(self, text="Rock", width=10, height=10,
+                           command=lambda: self.choice_made("rock"), repeatdelay=100)
+        self.rockButton.grid(row=5, column=0, sticky="s")
 
-        scissorsButton = tk.Button(self, text="Scissor",width=10, height=10,
-                           command=lambda: controller.show_frame("StartPage"), repeatdelay=1000, repeatinterval=100)
-        scissorsButton.grid(row=5, column=1,sticky="s")
+        self.scissorsButton = tk.Button(self, text="Scissor",width=10, height=10,
+                           command=lambda: self.choice_made("scissors"), repeatdelay=100)
+        self.scissorsButton.grid(row=5, column=1,sticky="s")
 
-        paperButton = tk.Button(self, text="Paper",width=10, height=10,
-                           command=lambda: controller.show_frame("StartPage"), repeatdelay=1000, repeatinterval=100)
-        paperButton.grid(row=5, column=2, sticky="s")
+        self.paperButton = tk.Button(self, text="Paper",width=10, height=10,
+                           command=lambda: self.choice_made("paper"), repeatdelay=100)
+        self.paperButton.grid(row=5, column=2, sticky="s")
 
         # 타임아웃 안내 진행바
-        self.progressbar=tkinter.ttk.Progressbar(self, maximum=100, mode="determinate")
-        self.progressbar.grid(row=6, column=1, pady=5)
+        self.progressbar=tkinter.ttk.Progressbar(self, length=300, maximum=100, variable=self.controller.shared_data["timeOutCount"],mode="determinate")
+        self.progressbar.grid(row=6, column=0, pady=5, columnspan=3)
 
 
-    def afterRaised(self):
-        self.progressbar.start(50)
+    def after_raised(self):
+        self.score_update()
+        self.progressbar.start(100)
+        self.after(1, self.stop_progressbar)
         return
+    
+    def stop_progressbar(self):
+        self.controller.shared_data["cancelID"] = self.after(50, self.stop_progressbar)
+        if self.controller.shared_data["timeOutCount"].get() == 99:
+            self.progressbar.stop()
+            self.cancel_thread()
+            self.controller.shared_data["timeOutCount"].set(0)
+            self.informLabel.config(text="Timeout! Waiting for the other player")
+            self.disable_buttons()
+
+    def score_update(self):
+        score = self.controller.shared_data["score"]
+        myScore = self.controller.shared_data["myScore"]
+        oppScore = self.controller.shared_data["oppScore"]
+        score.set("My Score " + str(myScore) + ", Opponent Score " + str(oppScore))
+    
+    def disable_buttons(self):
+        self.rockButton.config(state="disabled")
+        self.scissorsButton.config(state="disabled")
+        self.paperButton.config(state="disabled")
+    
+    def choice_made(self, choice):
+        connectionManager = self.controller.shared_data["connectionManager"]
+        self.progressbar.stop()
+        self.cancel_thread()
+        self.controller.shared_data["timeOutCount"].set(0)
+        self.informLabel.config(text="Choice made: " + choice.upper())
+        self.disable_buttons()
+
+
+    def cancel_thread(self):
+        if self.controller.shared_data["cancelID"] != None:
+            self.after_cancel(self.controller.shared_data["cancelID"])
+            self.controller.shared_data["cancelID"] = None
+            
+
 
 
 class PageTwo(tk.Frame):
