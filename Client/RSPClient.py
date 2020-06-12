@@ -211,7 +211,7 @@ class ConnectionPage(tk.Frame):
     
     # 연결 실패시 스레드를 끝내고 소켓 해제
     def cancel_connection(self):
-        self.cancelThread()
+        self.cancel_thread()
         self.controller.show_frame("StartPage")
         self.controller.shared_data["connectionManager"].close_socket()
 
