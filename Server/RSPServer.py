@@ -7,6 +7,8 @@ from socket import *
 from _thread import *
 import random as r
 
+addr1=[]
+addr2=[]
 pvsc=[0,0]
 win=[0,0]
 RSP_resultboard=[['win','lose'],['win', 'lose'],['win','lose']]
@@ -37,16 +39,19 @@ class RSPServer:
         print('waiting to be connected')
         clientSocket, addr = serverSocket.accept()
         threadA = start_new_thread(threaded, (clientSocket, addr))
+        
+    def addressCheck(self):
+        
     
 
 
 
 # 서버 오브젝트 생성 후 동작
-server = RSPServer()
-server.startServer()
-server.openSocket()
 
-
+if __name__ == '__main__':
+    server = RSPServer()
+    server.startServer()
+    server.openSocket()
 # 서버 클래스에 함수로 정의
 # 수정해주세요
 # while 1:
