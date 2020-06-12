@@ -99,7 +99,6 @@ def check_addr(addr_0, addr_1):
     else:
         return 1
 
-
 s_socket = socket(AF_INET, SOCK_STREAM)
 s_socket.bind((host,port))
 s_socket.listen(1)

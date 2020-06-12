@@ -13,12 +13,14 @@ BREAKCODE = 'BREAK'
 OKCODE = 'OK'
 TIMEOUT = 11
 
-class RSPClient(tk.Tk):
 # RSP 클라이언트
 # Shared_Data에 클라이언트 정보 통합 저장
 # 프레임을 만들고 Controller로 작동
+class RSPClient(tk.Tk):
+
     def __init__(self, *args, **kwargs):
         tk.Tk.__init__(self, *args, **kwargs)
+        # 공용 저장소
         self.shared_data={
             "username": tk.StringVar(),
             "userHOST": tk.StringVar(),
@@ -41,6 +43,7 @@ class RSPClient(tk.Tk):
 
 
         self.frames = {}
+        # 페이지 목록
         for F in (StartPage, ConnectionPage, ErrorPage, GamePage, PageTwo):
             page_name = F.__name__
             frame = F(parent=container, controller=self)
@@ -52,7 +55,7 @@ class RSPClient(tk.Tk):
         self.show_frame("StartPage")
 
     def show_frame(self, page_name):
-        '''Show a frame for the given page name'''
+        # 주어진 페이지 이름에 맞춰 프레임 raise
         frame = self.frames[page_name]
         frame.tkraise()
         frame.afterRaised()
@@ -61,35 +64,44 @@ class RSPClient(tk.Tk):
         return self.frames[page_class]
 
 
+# 시작 페이지
+# 서버 IP와 포트, user 이름을 받아 서버에 연결
 class StartPage(tk.Frame):
+
     def __init__(self, parent, controller):
         tk.Frame.__init__(self, parent)
         self.controller = controller
 
+        # 안내 라벨
         welcomeLabel=tk.Label(self, text="Welcome to RSP game.")
         welcomeLabel.pack()
 
         informLabel=tk.Label(self, text="Type server IP address and PORT number")
         informLabel.pack()
 
+        # IP 주소 엔트리
         IPInput = tk.Entry(self, width=50, textvariable=self.controller.shared_data["userHOST"])
         IPInput.insert(0,HOST)
         IPInput.pack()
 
+        # 포트 번호 엔트리
         portInput = tk.Entry(self, width=50, textvariable=self.controller.shared_data["userPORT"])
         portInput.insert(0,PORT)
         portInput.pack()
 
+        # 안내 라벨
         usernameLabel=tk.Label(self, text="Type username")
         usernameLabel.pack()
 
+        # 유저 이름 엔트리
         usernameInput = tk.Entry(self, width=50, textvariable=self.controller.shared_data["username"])
         usernameInput.pack()
 
-
+        # 연결 버튼
         connectButton = tk.Button(self, text="Connect", command=self.ConnectionEstablishment , overrelief="solid", width=15, repeatdelay=1000, repeatinterval=100)
         connectButton.pack()
 
+    # connect 버튼 눌렸을 경우 실행하는 함수
     def ConnectionEstablishment(self):
         self.controller.shared_data["connectionManager"] = ClientConnectionManager(self.controller.shared_data["userHOST"].get(), int(self.controller.shared_data["userPORT"].get()))
         connectionManager = self.controller.shared_data["connectionManager"]
@@ -100,33 +112,43 @@ class StartPage(tk.Frame):
             self.controller.show_frame("ErrorPage")
             self.controller.shared_data["connected"] = False
     
+    # raise 되고 실행되는 함수
     def afterRaised(self):
         return
             
 
+# 연결 시도 중일 때 뜨는 페이지
+# 타임아웃이 완료될 때까지, 혹은 서버가 코드를 보낼 때까지 대기
 class ConnectionPage(tk.Frame):
     def __init__(self, parent, controller):
         tk.Frame.__init__(self, parent)
         self.controller = controller
         connectionLabel = self.controller.shared_data["connectionLabel"]
 
+        # 안내 라벨
         label = tk.Label(self, text="Connecting", font=controller.title_font)
         label.pack(side="top", fill="x", pady=10)
 
+        # 연결 중임을 알리는 라벨
         connectionLabel=tk.Label(self, textvariable=connectionLabel)
         connectionLabel.pack()
 
+        # 연결 취소 버튼
         button = tk.Button(self, text="Cancel",
                            command=self.cancelConnection )
         button.pack()
 
+    # raise 되고 실행되는 함수
     def afterRaised(self):
         connectionManager = self.controller.shared_data["connectionManager"]
 
         count = self.controller.shared_data["count"]
         try:
+            # username이 성공적으로 전달 됐을 경우
             if connectionManager.sendMessage(self.controller.shared_data["username"].get()):
+                # receivercode 스레드로 재귀 실행 시작
                 self.after(1, self.receiveCode)
+            # 전달 실패 시
             else:
                 self.cancelThread()
                 self.controller.show_frame("ErrorPage")
@@ -136,80 +158,108 @@ class ConnectionPage(tk.Frame):
             self.cancelThread()
             return
 
-    
+    # 실제로 코드를 받으며 카운트를 재는 함수
     def receiveCode(self):
         count = self.controller.shared_data["count"]
         connectionManager = self.controller.shared_data["connectionManager"]
         username = self.controller.shared_data["username"].get()
+
+        # 카운트 +1
         self.controller.shared_data["count"] += 1
 
+        # 연결 중 라벨 업데이트
         self.controller.shared_data["connectionLabel"].set("Waiting to be connected, " + username + ", " + str(count))
         print(self.controller.shared_data["count"])
+
+        # 실제로 메시지 수신
         msg = connectionManager.receiveMessage()
         print(msg)
+
+        # 서버가 두 명이 접속하여 성공했음을 알림
         if msg == OKCODE:
             self.cancelThread()
             self.controller.shared_data["connectionLabel"].set("Game Starting...")
+            # 3초 후에 게임 페이지로 이동
             self.after(3000, self.controller.show_frame("GamePage"))
+        # 클라이언트가 두 명 이상이기 때문에 서버가 거부 
         elif msg == BREAKCODE:
             self.cancelThread()
             self.controller.show_frame("ErrorPage")
             self.controller.shared_data["connected"] = False
+        # 지정된 타임아웃이 아직 안되었을 경우
         elif count < TIMEOUT:
+            # 타임아웃 종료까지 1초에 한번 코드를 받음
             self.controller.shared_data["cancelID"] = self.after(1000, self.receiveCode)
+        # 타임아웃
         else:
             self.cancelThread()
             self.controller.show_frame("ErrorPage")
             self.controller.shared_data["connected"] = False
         return
     
+    # 현재 존재하는 스레드를 끝냄
+    # 타임아웃 카운트 초기화
     def cancelThread(self):
         if self.controller.shared_data["cancelID"] != None:
             self.after_cancel(self.controller.shared_data["cancelID"])
             self.controller.shared_data["cancelID"] = None
             self.controller.shared_data["count"] = 0
     
+    # 연결 실패시 스레드를 끝내고 소켓 해제
     def cancelConnection(self):
         self.cancelThread()
         self.controller.show_frame("StartPage")
         self.controller.shared_data["connectionManager"].closeSocket()
 
 
+# 연결 에러가 발생할 경우 이동하는 페이지
 class ErrorPage(tk.Frame):
     def __init__(self, parent, controller):
         tk.Frame.__init__(self, parent)
         self.controller = controller
+
+        # 에러 라벨
         label = tk.Label(self, text="Connection Error", font=controller.title_font)
         label.pack(side="top", fill="x", pady=10)
+        
+        # 시작 페이지로 이동 버튼
         button = tk.Button(self, text="Go to the start page",
                            command=lambda: controller.show_frame("StartPage"))
         button.pack()
 
+    # raise 되고 실행되는 함수
     def afterRaised(self):
         return
 
 
+# 실제 게임 실행 페이지
 class GamePage(tk.Frame):
     def __init__(self, parent, controller):
         tk.Frame.__init__(self, parent)
         self.controller = controller
-        scorelabel = tk.Label(self, text="My Score 0, Enemy Score 0", font=controller.title_font, width=30)
+
+        # 스코어 라벨
+        scorelabel = tk.Label(self, text="My Score 0, Opponent Score 0", font=controller.title_font, width=30)
         scorelabel.grid(row=0, column=0, pady=10,sticky="n", rowspan=3,columnspan=3)
+
+        # 안내 라벨
         label = tk.Label(self, text="Make your choice")
         label.grid(row=3, column=0, pady=10,sticky="n", rowspan=2,columnspan=3)
 
+        # 가위바위보 버튼
         rockButton = tk.Button(self, text="Rock", width=10, height=10,
-                           command=lambda: controller.show_frame("StartPage"))
+                           command=lambda: controller.show_frame("StartPage"), repeatdelay=1000, repeatinterval=100)
         rockButton.grid(row=5, column=0, sticky="s")
 
         scissorsButton = tk.Button(self, text="Scissor",width=10, height=10,
-                           command=lambda: controller.show_frame("StartPage"))
+                           command=lambda: controller.show_frame("StartPage"), repeatdelay=1000, repeatinterval=100)
         scissorsButton.grid(row=5, column=1,sticky="s")
 
         paperButton = tk.Button(self, text="Paper",width=10, height=10,
-                           command=lambda: controller.show_frame("StartPage"))
+                           command=lambda: controller.show_frame("StartPage"), repeatdelay=1000, repeatinterval=100)
         paperButton.grid(row=5, column=2, sticky="s")
 
+        # 타임아웃 안내 진행바
         self.progressbar=tkinter.ttk.Progressbar(self, maximum=100, mode="determinate")
         self.progressbar.grid(row=6, column=1, pady=5)
 
