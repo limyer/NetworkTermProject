@@ -1,5 +1,6 @@
 from socket import *
 import threading
+<<<<<<< HEAD
 # 실행 시 가위바위보의 결과가 이상하게 나올때가 있음 수정 필요, 라운드 종료시 초기화 구현 필요
 host = '192.168.43.142'
 port = 12000
@@ -13,13 +14,28 @@ card_table = [-1,-1]
 addr0 =[]
 addr1 =[]
 index = 0
+=======
+
+host = '192.168.43.142'
+port = 12000
+t=[]
+player = []
+addr0 =[]
+addr1 =[]
+index = 0
+
+>>>>>>> a9e10e3c7ecbd61a795fd93893aaedc499511bde
 class Cserver(threading.Thread):
     def __init__(self, socket):
         super().__init__()
         self.s_socket=socket
         self.myindex = -1
         self.RSP_resultboard=[['draw','win','lose'],['lose','draw','win'],['win','lose','draw']]
+<<<<<<< HEAD
         
+=======
+
+>>>>>>> a9e10e3c7ecbd61a795fd93893aaedc499511bde
     def run(self):
         global index
         self.c_socket, addr = self.s_socket.accept()
@@ -28,7 +44,12 @@ class Cserver(threading.Thread):
         addr1.append(addr[1])
         print(index)
         index += 1
+<<<<<<< HEAD
         creat_thread(self.s_socket)
+=======
+        create_thread(self.s_socket)
+        # 플레이어 추가
+>>>>>>> a9e10e3c7ecbd61a795fd93893aaedc499511bde
         data = self.c_recv()
         player.append(data)
         print(player)
@@ -121,6 +142,7 @@ class Cserver(threading.Thread):
                 if res == 'win':
                     return 'lose'
                         
+<<<<<<< HEAD
                 elif res == 'lose':
                     return 'win'
         else:
@@ -142,6 +164,12 @@ class Cserver(threading.Thread):
         else:
             self.myindex = 1
             return 1
+=======
+                        res = self.RSP_resultboard[self.card_table[0],self.card_table[1]]
+                        self.c_send(res)
+                        break
+        
+>>>>>>> a9e10e3c7ecbd61a795fd93893aaedc499511bde
 
     def c_recv(self):
         try:
@@ -158,21 +186,40 @@ class Cserver(threading.Thread):
     def c_send(self, put_data):
         self.c_socket.send(put_data.encode())
 
-def creat_thread(s_socket):
+def create_thread(s_socket):
     global index
     t.append(Cserver(s_socket))
-    t[index].demon = True
+    t[index].daemon = True
     t[index].start()
+<<<<<<< HEAD
     
+=======
+
+def check_card(data):
+    if data == b'0':
+        return 0
+    elif data == b'1':
+        return 1
+    elif data == b'2':
+        return 2
+    else:
+        return -1
+
+def check_addr(addr_0, addr_1):
+    if addr_0 == addr0[0] and addr_1 == addr1[0]:
+        return 0
+    else:
+        return 1
+
+>>>>>>> a9e10e3c7ecbd61a795fd93893aaedc499511bde
 s_socket = socket(AF_INET, SOCK_STREAM)
 s_socket.bind((host,port))
 s_socket.listen(1)
-creat_thread(s_socket)
+create_thread(s_socket)
 while True:
     try:
         for i in t:
             i.c_send('put_data'.encode())
-
     except Exception as e:
         pass
 for f in t:
