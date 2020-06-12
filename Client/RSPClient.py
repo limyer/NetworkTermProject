@@ -58,8 +58,8 @@ class RSPClient(tk.Tk):
 
         self.show_frame("StartPage")
 
+    # 주어진 페이지 이름에 맞춰 프레임 raise
     def show_frame(self, page_name):
-        # 주어진 페이지 이름에 맞춰 프레임 raise
         frame = self.frames[page_name]
         frame.tkraise()
         frame.after_raised()
@@ -77,10 +77,10 @@ class StartPage(tk.Frame):
         self.controller = controller
 
         # 안내 라벨
-        welcomeLabel=tk.Label(self, text="Welcome to RSP game.")
+        welcomeLabel=tk.Label(self, text="묵찌빠 게임에 오신 것을 환영합니다")
         welcomeLabel.pack()
 
-        informLabel=tk.Label(self, text="Type server IP address and PORT number")
+        informLabel=tk.Label(self, text="서버 IP와 포트 번호를 입력해주세요")
         informLabel.pack()
 
         # IP 주소 엔트리
@@ -94,7 +94,7 @@ class StartPage(tk.Frame):
         portInput.pack()
 
         # 안내 라벨
-        usernameLabel=tk.Label(self, text="Type username")
+        usernameLabel=tk.Label(self, text="유저 이름을 입력해주세요")
         usernameLabel.pack()
 
         # 유저 이름 엔트리
@@ -102,7 +102,7 @@ class StartPage(tk.Frame):
         usernameInput.pack()
 
         # 연결 버튼
-        connectButton = tk.Button(self, text="Connect", command=self.connection_establishment , overrelief="solid", width=15, repeatdelay=1000, repeatinterval=100)
+        connectButton = tk.Button(self, text="연결", command=self.connection_establishment , overrelief="solid", width=15, repeatdelay=1000, repeatinterval=100)
         connectButton.pack()
 
     # connect 버튼 눌렸을 경우 실행하는 함수
@@ -130,7 +130,7 @@ class ConnectionPage(tk.Frame):
         connectionLabel = self.controller.shared_data["connectionLabel"]
 
         # 안내 라벨
-        label = tk.Label(self, text="Connecting", font=controller.title_font)
+        label = tk.Label(self, text="연결 중", font=controller.title_font)
         label.pack(side="top", fill="x", pady=10)
 
         # 연결 중임을 알리는 라벨
@@ -138,7 +138,7 @@ class ConnectionPage(tk.Frame):
         connectionLabel.pack()
 
         # 연결 취소 버튼
-        button = tk.Button(self, text="Cancel",
+        button = tk.Button(self, text="취소",
                            command=self.cancel_connection )
         button.pack()
 
@@ -172,7 +172,7 @@ class ConnectionPage(tk.Frame):
         self.controller.shared_data["count"] += 1
 
         # 연결 중 라벨 업데이트
-        self.controller.shared_data["connectionLabel"].set("Waiting to be connected, " + username + ", " + str(count))
+        self.controller.shared_data["connectionLabel"].set("서버와 연결을 기다리는 중입니다, " + username + ", " + str(count))
         print(self.controller.shared_data["count"])
 
         # 실제로 메시지 수신
@@ -182,7 +182,7 @@ class ConnectionPage(tk.Frame):
         # 서버가 두 명이 접속하여 성공했음을 알림
         if msg == OKCODE:
             self.cancel_thread()
-            self.controller.shared_data["connectionLabel"].set("Game Starting...")
+            self.controller.shared_data["connectionLabel"].set("게임 시작 중...")
             # 3초 후에 게임 페이지로 이동
             self.after(3000, self.controller.show_frame("GamePage"))
         # 클라이언트가 두 명 이상이기 때문에 서버가 거부 
@@ -223,11 +223,11 @@ class ErrorPage(tk.Frame):
         self.controller = controller
 
         # 에러 라벨
-        label = tk.Label(self, text="Connection Error", font=controller.title_font)
+        label = tk.Label(self, text="연결 에러", font=controller.title_font)
         label.pack(side="top", fill="x", pady=10)
         
         # 시작 페이지로 이동 버튼
-        button = tk.Button(self, text="Go to the start page",
+        button = tk.Button(self, text="시작 페이지로 이동",
                            command=lambda: controller.show_frame("StartPage"))
         button.pack()
 
@@ -237,6 +237,7 @@ class ErrorPage(tk.Frame):
 
 
 # 실제 게임 실행 페이지
+# 그리드 레이아웃으로 구성
 class GamePage(tk.Frame):
     def __init__(self, parent, controller):
         tk.Frame.__init__(self, parent)
@@ -248,19 +249,19 @@ class GamePage(tk.Frame):
         scoreLabel.grid(row=0, column=0, pady=10,sticky="n", rowspan=3,columnspan=3)
 
         # 안내 라벨
-        self.informLabel = tk.Label(self, text="Make your choice")
+        self.informLabel = tk.Label(self, text="가위 바위 보를 시작합니다")
         self.informLabel.grid(row=3, column=0, pady=10,sticky="n", rowspan=2,columnspan=3)
 
         # 가위바위보 버튼
-        self.rockButton = tk.Button(self, text="Rock", width=10, height=10,
-                           command=lambda: self.choice_made("rock"), repeatdelay=100)
-        self.rockButton.grid(row=5, column=0, sticky="s")
-
-        self.scissorsButton = tk.Button(self, text="Scissor",width=10, height=10,
+        self.scissorsButton = tk.Button(self, text="가위", width=10, height=10,
                            command=lambda: self.choice_made("scissors"), repeatdelay=100)
-        self.scissorsButton.grid(row=5, column=1,sticky="s")
+        self.scissorsButton.grid(row=5, column=0, sticky="s")
 
-        self.paperButton = tk.Button(self, text="Paper",width=10, height=10,
+        self.rockButton = tk.Button(self, text="바위",width=10, height=10,
+                           command=lambda: self.choice_made("rock"), repeatdelay=100)
+        self.rockButton.grid(row=5, column=1,sticky="s")
+
+        self.paperButton = tk.Button(self, text="보",width=10, height=10,
                            command=lambda: self.choice_made("paper"), repeatdelay=100)
         self.paperButton.grid(row=5, column=2, sticky="s")
 
@@ -270,6 +271,7 @@ class GamePage(tk.Frame):
 
 
     def after_raised(self):
+        self.enable_buttons()
         self.score_update()
         self.progressbar.start(100)
         self.after(1, self.stop_progressbar)
@@ -281,15 +283,20 @@ class GamePage(tk.Frame):
             self.progressbar.stop()
             self.cancel_thread()
             self.controller.shared_data["timeOutCount"].set(0)
-            self.informLabel.config(text="Timeout! Waiting for the other player")
+            self.informLabel.config(text="시간 종료! 다른 플레이어를 기다립니다")
             self.disable_buttons()
 
     def score_update(self):
         score = self.controller.shared_data["score"]
         myScore = self.controller.shared_data["myScore"]
         oppScore = self.controller.shared_data["oppScore"]
-        score.set("My Score " + str(myScore) + ", Opponent Score " + str(oppScore))
+        score.set("내 점수: " + str(myScore) + ", 상대 점수 " + str(oppScore))
     
+    def enable_buttons(self):
+        self.rockButton.config(state="normal")
+        self.scissorsButton.config(state="normal")
+        self.paperButton.config(state="normal")
+
     def disable_buttons(self):
         self.rockButton.config(state="disabled")
         self.scissorsButton.config(state="disabled")
@@ -297,18 +304,17 @@ class GamePage(tk.Frame):
     
     def choice_made(self, choice):
         connectionManager = self.controller.shared_data["connectionManager"]
-        self.progressbar.stop()
-        self.cancel_thread()
-        self.controller.shared_data["timeOutCount"].set(0)
-        self.informLabel.config(text="Choice made: " + choice.upper())
+        self.informLabel.config(text="선택: " + choice.upper() + ", 상대 플레이어의 선택을 기다립니다")
         self.disable_buttons()
-
 
     def cancel_thread(self):
         if self.controller.shared_data["cancelID"] != None:
             self.after_cancel(self.controller.shared_data["cancelID"])
             self.controller.shared_data["cancelID"] = None
-            
+    
+    def reset(self):
+        self.cancel_thread()
+
 
 
 
