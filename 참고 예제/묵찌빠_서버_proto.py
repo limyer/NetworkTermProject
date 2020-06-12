@@ -25,7 +25,6 @@ def threaded(client_socket, addr):
         else:
             pass
         
-
         check = check_datatype(data)
         if check == 1:
             
@@ -43,13 +42,6 @@ def threaded(client_socket, addr):
                 # 플레이어가 모이면 play코드를 보내어 다음단계로 넘어가게한다
         elif check == 2:
             client_socket.send('ok'.encode())
-                
-        
-
-        
-            
-
-        
         #send_data(data)
         
     client_socket.close() 

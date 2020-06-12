@@ -1,12 +1,21 @@
 from socket import *
 import threading
 
+host = '192.168.43.142'
+port = 12000
+t=[]
+player = []
+addr0 =[]
+addr1 =[]
+index = 0
+
 class Cserver(threading.Thread):
     def __init__(self, socket):
         super().__init__()
         self.s_socket=socket
         self.card_table = [-1,-1]
         self.RSP_resultboard=[['draw','win','lose'],['lose','draw','win'],['win','lose','draw']]
+
     def run(self):
         global index
         # 연결
@@ -16,7 +25,7 @@ class Cserver(threading.Thread):
         addr1.append(addr[1])
         print(index)
         index += 1
-        creat_thread(self.s_socket)
+        create_thread(self.s_socket)
         # 플레이어 추가
         data = self.c_recv()
         player.append(data)
@@ -52,8 +61,6 @@ class Cserver(threading.Thread):
                         self.c_send(res)
                         break
         
-        
-        
 
     def c_recv(self):
         try:
@@ -70,10 +77,10 @@ class Cserver(threading.Thread):
     def c_send(self, put_data):
         self.c_socket.send(put_data.encode())
 
-def creat_thread(s_socket):
+def create_thread(s_socket):
     global index
     t.append(Cserver(s_socket))
-    t[index].demon = True
+    t[index].daemon = True
     t[index].start()
 
 def check_card(data):
@@ -91,22 +98,16 @@ def check_addr(addr_0, addr_1):
         return 0
     else:
         return 1
-host = '192.168.43.142'
-port = 12000
-t=[]
-player = []
-addr0 =[]
-addr1 =[]
-index = 0
+
+
 s_socket = socket(AF_INET, SOCK_STREAM)
 s_socket.bind((host,port))
 s_socket.listen(1)
-creat_thread(s_socket)
+create_thread(s_socket)
 while True:
     try:
         for i in t:
             i.c_send('put_data'.encode())
-
     except Exception as e:
         pass
 for f in t:
