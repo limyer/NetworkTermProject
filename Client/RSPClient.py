@@ -9,8 +9,9 @@ from tkinter import font  as tkfont
 
 HOST = '127.0.0.1'
 PORT = 12000
-BREAKCODE = 'break'
-OKCODE = 'ok'
+BREAKCODE = 'BREAK'
+OKCODE = 'OK'
+TIMEOUT = 11
 
 class RSPClient(tk.Tk):
 # RSP 클라이언트
@@ -23,7 +24,10 @@ class RSPClient(tk.Tk):
             "userHOST": tk.StringVar(),
             "userPORT": tk.StringVar(),
             "connectionManager": None,
-            "connected": False
+            "connected": False,
+            "cancelID": None,
+            "count": 1,
+            "connectionLabel":tk.StringVar(),
         }
 
         self.title_font = tkfont.Font(family='Helvetica', size=18, weight="bold", slant="italic")
@@ -37,7 +41,7 @@ class RSPClient(tk.Tk):
 
 
         self.frames = {}
-        for F in (StartPage, ConnectionPage, ErrorPage, PageTwo):
+        for F in (StartPage, ConnectionPage, ErrorPage, GamePage, PageTwo):
             page_name = F.__name__
             frame = F(parent=container, controller=self)
             self.frames[page_name] = frame
@@ -105,38 +109,71 @@ class ConnectionPage(tk.Frame):
     def __init__(self, parent, controller):
         tk.Frame.__init__(self, parent)
         self.controller = controller
-        
-
-        username = self.controller.shared_data["username"]
+        connectionLabel = self.controller.shared_data["connectionLabel"]
 
         label = tk.Label(self, text="Connecting", font=controller.title_font)
         label.pack(side="top", fill="x", pady=10)
 
-        usernameLabel=tk.Label(self, textvariable=username)
-        usernameLabel.pack()
+        connectionLabel=tk.Label(self, textvariable=connectionLabel)
+        connectionLabel.pack()
 
         button = tk.Button(self, text="Cancel",
-                           command=lambda: controller.show_frame("StartPage"))
+                           command=self.cancelConnection )
         button.pack()
 
     def afterRaised(self):
         connectionManager = self.controller.shared_data["connectionManager"]
-        if connectionManager.sendMessage(self.controller.shared_data["username"].get()):
-            msg = connectionManager.receiveMessage()
-            if msg == BREAKCODE:
+
+        count = self.controller.shared_data["count"]
+        try:
+            if connectionManager.sendMessage(self.controller.shared_data["username"].get()):
+                self.after(1, self.receiveCode)
+            else:
+                self.cancelThread()
                 self.controller.show_frame("ErrorPage")
                 self.controller.shared_data["connected"] = False
-            elif msg == OKCODE:
-                self.controller.show_frame("PageTwo")
-            else:
-                # 1초에 한번씩 재귀 수행
-                self.after(1000, self.afterRaised())
+            return
+        except error:
+            self.cancelThread()
+            return
+
+    
+    def receiveCode(self):
+        count = self.controller.shared_data["count"]
+        connectionManager = self.controller.shared_data["connectionManager"]
+        username = self.controller.shared_data["username"].get()
+        self.controller.shared_data["count"] += 1
+
+        self.controller.shared_data["connectionLabel"].set("Waiting to be connected, " + username + ", " + str(count))
+        print(self.controller.shared_data["count"])
+        msg = connectionManager.receiveMessage()
+        print(msg)
+        if msg == OKCODE:
+            self.cancelThread()
+            self.controller.show_frame("PageTwo")
+        elif msg == BREAKCODE:
+            self.cancelThread()
+            self.controller.show_frame("ErrorPage")
+            self.controller.shared_data["connected"] = False
+        elif count < TIMEOUT:
+            self.controller.shared_data["cancelID"] = self.after(1000, self.receiveCode)
         else:
+            self.cancelThread()
             self.controller.show_frame("ErrorPage")
             self.controller.shared_data["connected"] = False
         return
+    
+    def cancelThread(self):
+        if self.controller.shared_data["cancelID"] != None:
+            self.after_cancel(self.controller.shared_data["cancelID"])
+            self.controller.shared_data["cancelID"] = None
+            self.controller.shared_data["count"] = 0
+    
+    def cancelConnection(self):
+        self.cancelThread()
+        self.controller.show_frame("StartPage")
+        self.controller.shared_data["connectionManager"].closeSocket()
 
-                    
 
 
 
@@ -153,6 +190,19 @@ class ErrorPage(tk.Frame):
     def afterRaised(self):
         return
 
+class GamePage(tk.Frame):
+
+    def __init__(self, parent, controller):
+        tk.Frame.__init__(self, parent)
+        self.controller = controller
+        label = tk.Label(self, text="This is page 2", font=controller.title_font)
+        label.pack(side="top", fill="x", pady=10)
+        button = tk.Button(self, text="Go to the start page",
+                           command=lambda: controller.show_frame("StartPage"))
+        button.pack()
+    
+    def afterRaised(self):
+        return
 
 
 class PageTwo(tk.Frame):
