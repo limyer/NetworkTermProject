@@ -19,7 +19,7 @@
 
 #2. 클라] 10초 이내에 가위바위보 값 입력 (Code: "Stage 1 Input: " + "ROCK" or "SCISSORS" or "PAPER")
 #2-1.클라] 10초 이내로 결정하지 못할 시 코드 전송 (Code: "Stage 1 Input: " + "Undecided")
-#2-2 서버] 스레드에서 10초 이내로 전송을 하지 경우, 혹은 Undecided 코드가 왔을 경우 스테이지 재시작 코드 전송 (Code: "Restart")
+#2-2 서버] 스레드에서 10초 이내로 전송을 하지 않을 경우, 혹은 Undecided 코드가 왔을 경우 스테이지 재시작 코드 전송 (Code: "Restart")
 #2-3 서버, 클라] Restart 코드가 왔을 경우 (보냈을 경우) 재시작을 알리고 #2로 돌아감
 
 #3. 서버] 입력받은 두 가위바위보 값 서버 내에서 비교한 후 각자의 스레드 1, 2에 이겼다/아니다/무승부 코드 전송해준다. (Code: "Stage 1: " + "Win" or "Lose" or "Draw")
@@ -41,7 +41,7 @@
 
 #4. 클라] 10초 이내에 묵찌빠 값 입력 (Code: "Stage 2 Input: " + "ROCK" or "SCISSORS" or "PAPER")
 #4-1.클라] 10초 이내로 결정하지 못할 시 코드 전송 (Code: "Stage 2 Input: " + "Undecided")
-#4-2 서버] 스레드에서 10초 이내로 전송을 하지 경우, 혹은 Undecided 코드가 왔을 경우 스테이지 재시작 코드 전송 (Code: "Restart")
+#4-2 서버] 스레드에서 10초 이내로 전송을 하지 않을 경우, 혹은 Undecided 코드가 왔을 경우 스테이지 재시작 코드 전송 (Code: "Restart")
 #4-3 서버, 클라] Restart 코드가 왔을 경우 (보냈을 경우) 재시작을 알리고 #2로 돌아감
 
 #5. 서버] 입력받은 묵찌빠 값 비교하고 같은 입력이 아니라면 현재 턴이 누구인지 판단하여 저장하고 각 스레드에서 전송 (Code: "Your Turn" or "Not Your Turn")
