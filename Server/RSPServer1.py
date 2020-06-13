@@ -2,32 +2,40 @@ from socket import *
 import threading
 
 ADDR=('',12000)
-serverSocket=socket(AF_INET,SOCK_STREAM)
-serverSocket.bind(ADDR)
-serverSocket.listen(1)
-
 index=0 #접속한 사람 수
 t=[] #쓰레드
 score=[0,0]
 
-
-
-
-
-def socketThread():
-    global index
-    clientSocket,addr=serverSocket.accept()
-    playerNumber=index
-    index+=1
-    print(f'player {playerNumber+1} connected {addr}')
+class Cserver(threading.Thread):
+    serverSocket=socket(AF_INET,SOCK_STREAM)
     
-    clientSocket.send('enter your name:'.encode())
-    name=clientSocket.recv(2048).decode() #이름 지정
-    print(f'player {playerNumber+1} name: {name}')
+    def __init__(self, socket):
+        super().__init__()
+        self.serverSocket=socket
+        
+    def startServer(self):
+        serverSocket.bind(ADDR)
+        serverSocket.listen(1)
+        i=0        
+        while i<2:
+            t.append(threading.Thread(target=socketThread))
+            t[i].daemon=True
+            t[i].start()
+            i+=1
+
+    def socketThread(self):
+        global index
+        clientSocket,addr=serverSocket.accept()
+        playerNumber=index
+        index+=1
+        print(f'player {playerNumber+1} connected {addr}')
+    
+        clientSocket.send('enter your name:'.encode())
+        name=clientSocket.recv(2048).decode() #이름 지정
+        print(f'player {playerNumber+1} name: {name}')
         
         
-        
-        
+                
 def RSPStage1(player1,player2):
     if player1==player2:
         return 2 #비길 경우 2
@@ -56,10 +64,6 @@ def RSPMain(player1,player2):
         
 
 if __name__ == '__main__':
-    i=0        
-    while i<2:
-        t.append(threading.Thread(target=socketThread))
-        t[i].daemon=True
-        t[i].start()
-        i+=1
+    server = Cserver()
+    server.startServer()
     RSPMain()
