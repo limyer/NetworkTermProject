@@ -81,7 +81,7 @@ while i<2:
 whoWon=2
 while True:
     if score[0] or score[1]==3:
-        stage=3
+       stage=3
     
     if clientCard[0]!='' and clientCard[1]!='' and stage==0 and stage1==1:
         if RSPStage1(clientCard[0],clientCard[1])==2:
@@ -118,6 +118,12 @@ while True:
         stage==3
         
     if stage==3:
+        if score[0]==3:
+            clientS[0].send(f'You Win!'.encode())
+            clientS[1].send(f'You Lose!'.encode())
+        if score[1]==3:
+            clientS[1].send(f'You Win!'.encode())
+            clientS[0].send(f'You Lose!'.encode())
         cleintS[0].close()
         cleintS[1].close()
         break
