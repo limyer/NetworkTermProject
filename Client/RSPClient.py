@@ -12,6 +12,7 @@ PORT = 12000
 BREAKCODE = 'Break' # (Code: "Break") 
 STAGE0TO1CODE = 'Stage 0 to 1' # (Code: "Stage 0 to 1")
 USERNAMECODE = 'Username: ' # (Code: "Username: " + username)
+REWRITECODE = "Rewrite"
 TIMEOUT = 70
 
 # RSP 클라이언트
@@ -32,6 +33,7 @@ class RSPClient(tk.Tk):
             "count": 1,
             "timeOutCount": tk.IntVar(),
             "connectionLabel":tk.StringVar(),
+            "usernameLabel":tk.StringVar(),
             "score":tk.StringVar(),
             "myScore":0,
             "oppScore":0,
@@ -76,6 +78,7 @@ class StartPage(tk.Frame):
     def __init__(self, parent, controller):
         tk.Frame.__init__(self, parent)
         self.controller = controller
+        self.controller.shared_data["usernameLabel"].set("유저 이름을 입력해주세요")
 
         # 안내 라벨
         welcomeLabel=tk.Label(self, text="묵찌빠 게임에 오신 것을 환영합니다")
@@ -95,7 +98,7 @@ class StartPage(tk.Frame):
         portInput.pack()
 
         # 안내 라벨
-        usernameLabel=tk.Label(self, text="유저 이름을 입력해주세요")
+        usernameLabel=tk.Label(self, textvariable=self.controller.shared_data["usernameLabel"])
         usernameLabel.pack()
 
         # 유저 이름 엔트리
@@ -191,6 +194,11 @@ class ConnectionPage(tk.Frame):
             self.cancel_thread()
             self.controller.show_frame("ErrorPage")
             self.controller.shared_data["connected"] = False
+        elif msg == REWRITECODE:
+            self.cancel_thread()
+            self.controller.show_frame("StartPage")
+            self.controller.shared_data["usernameLabel"].set("같은 유저 이름이 있습니다, 다시 입력해주세요")
+            self.controller.shared_data["connected"] = False
         # 지정된 타임아웃이 아직 안되었을 경우
         elif count < TIMEOUT:
             # 타임아웃 종료까지 1초에 한번 코드를 받음
@@ -214,6 +222,7 @@ class ConnectionPage(tk.Frame):
     def cancel_connection(self):
         self.cancel_thread()
         self.controller.show_frame("StartPage")
+        self.controller.shared_data["usernameLabel"].set("유저 이름을 입력해주세요")
         self.controller.shared_data["connectionManager"].close_socket()
 
 

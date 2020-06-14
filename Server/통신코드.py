@@ -11,6 +11,8 @@
 #2. 클라] 이름 입력해서 전송 (Code: "Username: " + username)
 
 #3. 서버] 전송받은 이름 "토큰"으로 뽑아내어서 각각 저장 (예: "Username:" 이부분만 빼고 저장)
+#3-1. 서버] 전송 받은 이름이 다른 사람의 username과 동일한 경우 재입력 코드 전송 (Code: "Rewrite")
+#3-2. 클라] 재입력 코드 시 #2로 돌아감
 
 #4  서버] 이름 전송 받고 클라이언트가 두 개 접속인지 확인, 두 개 접속했을 경우 두 클라이언트에 게임 시작 코드 전송 (Code: "Stage 0 to 1")
 #4-1. 서버] 두 개 이상 접속일 경우 연결 해제 코드 전송 (Code: "Break") 
@@ -23,8 +25,8 @@
 # 가위바위보 (Stage 1)
 #1. 서버] 이용자(스레드) 1, 2에 가위바위보 입력하라고 보낸다. (Code: "Receiving Stage 1")
 
-#2. 클라] 10초 이내에 가위바위보 값 입력 (Code: "Stage 1 Input: " + "ROCK" or "SCISSORS" or "PAPER")
-#2-1.클라] 10초 이내로 결정하지 못할 시 코드 전송 (Code: "Stage 1 Input: " + "Undecided")
+#2. 클라] 10초 이내에 가위바위보 값 입력 (Code: username + "Stage 1 Input: " + "ROCK" or "SCISSORS" or "PAPER")
+#2-1.클라] 10초 이내로 결정하지 못할 시 코드 전송 (Code: username + "Stage 1 Input: " + "Undecided")
 #2-2 서버] 스레드에서 10초 이내로 전송을 하지 않을 경우, 혹은 Undecided 코드가 왔을 경우 스테이지 재시작 코드 전송 (Code: "Restart")
 #2-3 서버, 클라] Restart 코드가 왔을 경우 (보냈을 경우) 재시작을 알리고 #2로 돌아감
 
@@ -45,8 +47,8 @@
 
 #3. 서버] 이용자에 묵찌빠 값 입력하라고 보낸다. (Code: "Receiving Stage 2")
 
-#4. 클라] 10초 이내에 묵찌빠 값 입력 (Code: "Stage 2 Input: " + "ROCK" or "SCISSORS" or "PAPER")
-#4-1.클라] 10초 이내로 결정하지 못할 시 코드 전송 (Code: "Stage 2 Input: " + "Undecided")
+#4. 클라] 10초 이내에 묵찌빠 값 입력 (Code: username + "Stage 2 Input: " + "ROCK" or "SCISSORS" or "PAPER")
+#4-1.클라] 10초 이내로 결정하지 못할 시 코드 전송 (Code: username + "Stage 2 Input: " + "Undecided")
 #4-2 서버] 스레드에서 10초 이내로 전송을 하지 않을 경우, 혹은 Undecided 코드가 왔을 경우 스테이지 재시작 코드 전송 (Code: "Restart")
 #4-3 서버, 클라] Restart 코드가 왔을 경우 (보냈을 경우) 재시작을 알리고 #2로 돌아감
 

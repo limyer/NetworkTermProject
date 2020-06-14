@@ -31,23 +31,27 @@ class RSPServer:
     def open_socket(self):
         print('waiting to be connected')
         clientThread = self.serverManager.accept_socket()
-        if clientThread != None:
+        if clientThread != "None":
             RSPServer.threadList.append(clientThread)
             self.serverManager.run_client_thread(clientThread)
+
     
     def game_run(self, clientSocket):
-        print('Thread started')
         try:
-            self.stage0(clientSocket)
+            self.stage0(self, clientSocket)
         except error:
+            print('Error occured: Restart game')
             self.serverManager.send_message(clientSocket, RESTARTCODE)
-            self.game_run(clientSocket)
+            self.game_run(self, clientSocket)
 
 
     def stage0(self, clientSocket):
+        print("Stage 0 start")
+        RSPServer.stage = 0
         while True:
             if len(RSPServer.threadList) == 2:
                 self.serverManager.send_message(clientSocket, STAGE0TO1CODE)
+                print("Stage 0 end")
                 break
         return
 

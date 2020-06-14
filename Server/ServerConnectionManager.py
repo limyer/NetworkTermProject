@@ -4,6 +4,7 @@ from RSPServer import *
 BREAKCODE = 'Break' # (Code: "Break") 
 STAGE0TO1CODE = 'Stage 0 to 1' # (Code: "Stage 0 to 1")
 RESTARTCODE = 'Restart' # (Code: "Restart")
+REWRITECODE = 'Rewrite'
 
 # 서버 연결 매니저 (Server Side)
 class ServerConnectionManager:
@@ -25,20 +26,41 @@ class ServerConnectionManager:
             clientThread = self.make_client_thread(clientSocket)
             return clientThread
         except error:
-            return None
+            return "None"
 
     def make_client_thread(self, clientSocket):
         if len(RSPServer.threadList) >= 2:
             self.receive_message(clientSocket)
             self.send_message(clientSocket, BREAKCODE)
             clientSocket.close()
-            return None
+            return "None"
         else:
-            # (Code: "Username: " + username)
-            username = clientSocket.recv(1024).decode().split()[1]
+            username = self.get_username(clientSocket)
+            if username == None:
+                return "None"
+
+            while True:
+                if username in RSPServer.usernameList:
+                    self.send_message(clientSocket, REWRITECODE)
+                    username = self.get_username(clientSocket)
+                    if username == None:
+                        return "None"
+                else:
+                    break
+
             RSPServer.usernameList.append(username)
             clientThread = threading.Thread(target=RSPServer.game_run, args=(RSPServer, clientSocket,))
             return clientThread
+
+    def get_username(self, clientSocket):
+        # (Code: "Username: " + username)
+        usernameRaw = self.receive_message(clientSocket)
+        if usernameRaw != None:
+            username = usernameRaw.split()[1]
+            return username
+        else:
+            return None
+
 
     def run_client_thread(self, clientThread):
         clientThread.daemon = True
@@ -63,9 +85,9 @@ class ServerConnectionManager:
     def receive_message(self, clientSocket):
         if self.socketMade:
             try:
-                msg = clientSocket.recv(1024)
+                msg = clientSocket.recv(1024).decode()
                 print("Received: " + msg)
-                return msg.decode()
+                return msg
             except timeout:
                 return None
         else:
