@@ -17,6 +17,7 @@ USERNAMECODE = 'Username: ' # (Code: "Username: " + username)
 REWRITECODE = 'Rewrite'
 STAGE1STARTCODE = 'Receiving Stage 1'
 CANCELCODE = 'Cancel'
+RESTARTCODE = 'Restart' # (Code: "Restart")
 TIMEOUT = 70
 
 # RSP 클라이언트
@@ -202,14 +203,14 @@ class ConnectionPage(tk.Frame):
         elif msg == REWRITECODE:
             self.cancel_thread()
             self.controller.show_frame("StartPage")
-            self.controller.shared_data["usernameLabel"].set("같은 유저 이름이 있습니다, 다시 입력해주세요")
+            self.controller.shared_data["usernameLabel"].set("이름을 다시 입력해주세요")
             self.controller.shared_data["connected"] = False
         # 지정된 타임아웃이 아직 안되었을 경우
         elif count < TIMEOUT:
             # 타임아웃 종료까지 1초에 한번 코드를 받음
             self.controller.shared_data["cancelID"] = self.after(1000, self.receive_code)
         # 타임아웃
-        else:
+        elif count >= TIMEOUT:
             self.cancel_thread()
             self.controller.show_frame("ErrorPage")
             self.controller.shared_data["connected"] = False
@@ -270,15 +271,15 @@ class GamePage(tk.Frame):
 
         # 가위바위보 버튼
         self.scissorsButton = tk.Button(self, text="가위", width=10, height=10,
-                           command=lambda: self.choice_made("scissors"), repeatdelay=100)
+                           command=lambda: self.choice_made("SCISSORS"), repeatdelay=100)
         self.scissorsButton.grid(row=5, column=0, sticky="s")
 
         self.rockButton = tk.Button(self, text="바위",width=10, height=10,
-                           command=lambda: self.choice_made("rock"), repeatdelay=100)
+                           command=lambda: self.choice_made("ROCK"), repeatdelay=100)
         self.rockButton.grid(row=5, column=1,sticky="s")
 
         self.paperButton = tk.Button(self, text="보",width=10, height=10,
-                           command=lambda: self.choice_made("paper"), repeatdelay=100)
+                           command=lambda: self.choice_made("PAPER"), repeatdelay=100)
         self.paperButton.grid(row=5, column=2, sticky="s")
 
         # 타임아웃 안내 진행바
@@ -299,33 +300,60 @@ class GamePage(tk.Frame):
         print(msg)
 
         # 서버가 게임 시작을 알림
-        if msg == STAGE0TO1CODE:
+        if msg == STAGE1STARTCODE:
             self.cancel_thread()
-            self.enable_buttons()
-            self.score_update()
-            self.progressbar.start(100)
-            self.after(1, self.stop_progressbar)
+            self.start_stage1()
+
         elif count < TIMEOUT:
             # 타임아웃 종료까지 1초에 한번 코드를 받음
             self.controller.shared_data["cancelID"] = self.after(100, self.after_raised)
         # 타임아웃
-        else:
+        elif count >= TIMEOUT:
             self.cancel_thread()
             self.controller.show_frame("ErrorPage")
             self.controller.shared_data["connected"] = False
         return
 
+    def choice_made(self, choice):
+        connectionManager = self.controller.shared_data["connectionManager"]
+        self.informLabel.config(text="선택: " + choice.upper() + ", 상대 플레이어의 선택을 기다립니다")
+        connectionManager.send_message("Stage1Input: " + choice)
+        self.disable_buttons()
+        self.after(1, self.receive_code)
+
     def receive_code(self):
+        connectionManager = self.controller.shared_data["connectionManager"]
+        msg = connectionManager.receive_message()
+        print(msg)
+        
+        if msg == "Stage1: Draw" or RESTARTCODE:
+            self.start_stage1()
+        elif msg== "Stage1: Win":
+            self.informLabel.config(text="묵찌빠를 시작합니다. 당신의 턴입니다.")
+        elif msg== "Stage1: Lose":
+            self.informLabel.config(text="묵찌빠를 시작합니다. 상대의 턴입니다.")
+        else:
+            self.controller.shared_data["cancelID"] = self.after(100, self.receive_result)
+        self.cancel_Thread()
         return
 
+    def start_stage1(self):
+        self.enable_buttons()
+        self.score_update()
+        self.progressbar.start(100)
+        self.after(1, self.stop_progressbar)
+
     def stop_progressbar(self):
+        connectionManager = self.controller.shared_data["connectionManager"]
         self.controller.shared_data["progressbarCancelID"] = self.after(50, self.stop_progressbar)
         if self.controller.shared_data["timeOutCount"].get() == 99:
             self.progressbar.stop()
             self.cancel_progrssThread()
             self.controller.shared_data["timeOutCount"].set(0)
-            self.informLabel.config(text="시간 종료! 다른 플레이어를 기다립니다")
+            self.informLabel.config(text="시간 종료!")
             self.disable_buttons()
+            self.controller.send_message("Stage1Input: Undecided")
+            self.after(1, self.receive_code)
 
     def score_update(self):
         score = self.controller.shared_data["score"]
@@ -343,15 +371,17 @@ class GamePage(tk.Frame):
         self.scissorsButton.config(state="disabled")
         self.paperButton.config(state="disabled")
     
-    def choice_made(self, choice):
-        connectionManager = self.controller.shared_data["connectionManager"]
-        self.informLabel.config(text="선택: " + choice.upper() + ", 상대 플레이어의 선택을 기다립니다")
-        self.disable_buttons()
 
     def cancel_progrssThread(self):
         if self.controller.shared_data["progressbarCancelID"] != None:
-            self.after_cancel(self.controller.shared_data["cancelID"])
+            self.after_cancel(self.controller.shared_data["progressbarCancelID"])
             self.controller.shared_data["progressbarCancelID"] = None
+
+    def cancel_Thread(self):
+        if self.controller.shared_data["cancelID"] != None:
+            self.after_cancel(self.controller.shared_data["cancelID"])
+            self.controller.shared_data["cancelID"] = None
+            self.controller.shared_data["count"] = 0
     
     def reset(self):
         self.cancel_progrssThread()
@@ -378,120 +408,3 @@ if __name__== "__main__":
     app = RSPClient()
     app.mainloop()
 
-
-
-
-    # def check_retry(self):
-    #     while 1:
-    #         ifCheck=input('Do you want to start a new game? Yes or No')
-    #         if ifCheck=='Yes':
-    #             return 0
-    #             break
-    #         elif ifCheck=='No':
-    #             return -1
-    #             break
-    #         else:
-    #             print('You wrote wrong answer')
-
-    # def input_player_card(self):
-    #     player_card=input('Write your card within 5 seconds:')
-    #     check_time()
-    #     if check_time==-1:
-    #         print('Time over, you lose')
-    #         clientSocket,send(lose_card.encode())
-    #         return -1
-    #     elif check_time==0:
-    #         if player_card in card:
-    #             print('Your card is',player_card)
-    #             clientSocket.send(player_card.encode())
-    #             return 0
-    #         else:
-    #             print('You write wrong card, you lose')
-    #             clientSocket.send(lose_card.encode())
-    #             return -1
-
-    # def makePlayerName(self):
-    #         player_name=input('Enter your name:')
-    #         print('Your name is',player_name)
-    #         check_player=input('Is it right? yes or no:')
-    #         if check_player=='yes':
-    #             self.manager.makeConnection()
-    #             #연결 실패시 프로그램 종료 연결 성공시 이름을 전송
-    #             clientSocket.send(player_name.encode())
-    #             return True
-    #         else:
-    #             return False
-
-    # while 1:
-    #     manager = ClientConnectionManager(HOST, PORT)
-
-
-    #     while 1: # 이름 전송
-
-
-    #     while 1:
-    #         #플레이어의 패를 확인
-    #         player_card_result=input_player_card()
-    #         if player_card_result==-1:
-    #             code=-1
-    #             break
-    #         #상대방의 패를 확인
-    #         recv_enemy_card=clientSocket.recv(1024)
-    #         if recv_enemy_card==b'you win':
-    #             print('Enemy say lose, you win')
-    #             code=-1
-    #             break
-    #         else:
-    #             print("enemy's card is",recv_enemy)
-    #         #결과 확인
-    #         recv_result=clientSocket.recv(1024)
-    #         #선후공이 정해지지 않았을 시 처음으로 돌아가 같은 작업 반복, 선후공이 결정나면 본격적인 게임 시작
-    #         if recv_result==b'draw try one more time':
-    #             print(recv_result)
-    #             continue
-    #         else:
-    #             print(recv_result) # you win you are attacker or you lose you are deffender
-    #             break
-    #     if code==-1
-    #         retry=check_retry()
-    #         if retry==-1:
-    #             break
-    #         else:
-    #             code=0
-    #             continue
-    #     while 1:
-    #         #플레이어의 패를 확인
-    #         player_card_result=input_player_card()
-    #         if player_card_result==-1:
-    #             code=-1
-    #             break
-    #         #상대방의 패를 확인
-    #         recv_enemy_card=clientSocket.recv(1024)
-    #         if recv_enemy_card==b'you win':
-    #             print('Enemy say lose, you win')
-    #             code=-1
-    #             break
-    #         else:
-    #             print("enemy's card is",recv_enemy)
-    #         #결과 확인
-    #         recv_result=clientSocket.recv(1024)
-    #         #플레이어가 승리시
-    #         if recv_result==b'win':
-    #             print(player_name,'win!')
-    #             break
-    #         #플레이어가 패배시
-    #         elif recv_result=b'lose':
-    #             print(player_name,'lose')
-    #             break
-    #         #선후공이 바뀌거나 유지 될때
-    #         else:
-    #             print(recv_result)
-    #             continue
-    #     #재시작 하거나 클라이언트를 종료
-    #     code=check_retry()
-    #     if code==-1:
-    #         clientSocket.close()
-    #         break
-    #     elif code==0:
-    #         clientSocket.close()
-    #         continue
