@@ -343,7 +343,7 @@ class GamePage(tk.Frame):
     def start_stage1(self):
         self.enable_buttons()
         self.score_update()
-        self.controller.shared_data["timeOutCount"] = 0
+        self.controller.shared_data["timeOutCount"].set(0)
         self.progressbar.start(100)
         self.after(1, self.stop_progressbar)
 
