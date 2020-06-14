@@ -36,17 +36,17 @@ class RSPServer:
             self.serverManager.run_client_thread(clientThread)
 
     
-    def game_run(self, clientSocket):
+    def game_run(self, clientSocket, username):
         try:
-            self.stage0(self, clientSocket)
+            self.stage0(self, clientSocket, username)
         except error:
             print('Error occured: Restart game')
             self.serverManager.send_message(clientSocket, RESTARTCODE)
-            self.game_run(self, clientSocket)
+            self.game_run(self, clientSocket, username)
 
 
-    def stage0(self, clientSocket):
-        print("Stage 0 start")
+    def stage0(self, clientSocket, username):
+        print(username + " has started Stage 0")
         RSPServer.stage = 0
         while True:
             if len(RSPServer.threadList) == 2:

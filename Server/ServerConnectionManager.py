@@ -49,7 +49,7 @@ class ServerConnectionManager:
                     break
 
             RSPServer.usernameList.append(username)
-            clientThread = threading.Thread(target=RSPServer.game_run, args=(RSPServer, clientSocket,))
+            clientThread = threading.Thread(target=RSPServer.game_run, args=(RSPServer, clientSocket, username))
             return clientThread
 
     def get_username(self, clientSocket):
