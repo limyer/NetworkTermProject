@@ -131,12 +131,15 @@ class RSPServer:
             print(username + " is in Stage 0")
             if (len(RSPServer.threadList)) == 2:
                 self.connectionManager.send_message(clientSocket, STAGE0TO1CODE)
+                RSPServer.connectionCount += 1
                 print("Stage 0 end")
-                RSPServer.endStage0Flag = True
-                time.sleep(3)
-                RSPServer.stage = 1
-                RSPServer.endStage1Flag = False
-                RSPServer.startStageFlag = True
+                if RSPServer.connectionCount == 2:
+                    RSPServer.endStage0Flag = True
+                    time.sleep(3)
+                    RSPServer.stage = 1
+                    RSPServer.endStage1Flag = False
+                    RSPServer.startStageFlag = True
+                    RSPServer.connectionCount = 0
             if self.connectionManager.receive_message(clientSocket) == CANCELCODE:
                 index = RSPServer.usernameList.index(username)
                 self.remove_from_list(index)

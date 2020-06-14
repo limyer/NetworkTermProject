@@ -377,7 +377,7 @@ class GamePage(tk.Frame):
             self.after_cancel(self.controller.shared_data["progressbarCancelID"])
             self.controller.shared_data["progressbarCancelID"] = None
 
-    def cancel_Thread(self):
+    def cancel_thread(self):
         if self.controller.shared_data["cancelID"] != None:
             self.after_cancel(self.controller.shared_data["cancelID"])
             self.controller.shared_data["cancelID"] = None
