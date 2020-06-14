@@ -149,8 +149,11 @@ class RSPServer:
         if not RSPServer.endStage1Flag:
             print(username + " is in Stage 1")
             if RSPServer.startStageFlag:
+                RSPServer.connectionCount += 1
                 self.connectionManager.send_message(clientSocket, STAGE1STARTCODE)
-                RSPServer.startStageFlag = False
+                if RSPServer.connectionCount == 2:
+                    RSPServer.startStageFlag = False
+                    RSPServer.connectionCount = 0
             else:
                 msg = self.connectionManager.receive_message(clientSocket)
                 if msg == None or "":
@@ -158,9 +161,12 @@ class RSPServer:
                 msg = msg.split()
                 index = RSPServer.usernameList.index(username)
                 if len(msg) == 2 and not RSPServer.playerInputReceived[index]:
+                    RSPServer.connectionCount += 1
                     if msg[1] == UNDECIDEDCODE:
                         self.connectionManager.send_message(clientSocket, RESTARTCODE)
-                        RSPServer.playerInputReceived = [False, False]
+                        if RSPServer.connectionCount == 2:
+                            RSPServer.playerInputReceived = [False, False]
+                            RSPServer.connectionCount = 0
                     else:
                         if msg[1] == ROCKCODE:
                             RSPServer.playerInput[index] = ROCKCODE
@@ -186,8 +192,10 @@ class RSPServer:
                         # RSPServer.stage = 2
                         # RSPServer.endStage2Flag = False
                         # RSPServer.startStageFlag = True
-                    RSPServer.playerInputReceived = [False, False]
-                    RSPServer.playerInput = ["", ""]
+                    if RSPServer.connectionCount == 2:
+                        RSPServer.playerInputReceived = [False, False]
+                        RSPServer.playerInput = ["", ""]
+                        RSPServer.connectionCount = 0
         return
 
     def stage1_result(self, index):
