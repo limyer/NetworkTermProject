@@ -215,8 +215,8 @@ class RSPServer:
     def stage2(self, clientSocket, username):
         print(username + " is in Stage 2")
         time.sleep(3)
-        RSPServer.stage = 1
-        self.connectionManager.send_message(clientSocket, STAGE0TO1CODE)
+        RSPServer.stage = 2
+        print("Server End")
 
     def remove_from_list(self,index):
         RSPServer.usernameList.remove(RSPServer.usernameList[index])
