@@ -298,7 +298,6 @@ class GamePage(tk.Frame):
 
         msg = connectionManager.receive_message()
 
-
         # 서버가 게임 시작을 알림
         if msg == STAGE1STARTCODE:
             self.cancel_thread()
@@ -329,20 +328,20 @@ class GamePage(tk.Frame):
 
         if msg == "Stage1: Draw":
             self.informLabel.config(text="비겼습니다. 다시 가위바위보를 시작합니다.")
-            self.cancel_thread()
-            self.after(3000, self.after_raised)
+            self.reset()
+            self.after(2000, self.after_raised)
         elif msg == RESTARTCODE:
             self.informLabel.config(text="다시 가위바위보를 시작합니다.")
-            self.cancel_thread()
-            self.after(3000, self.after_raised)
+            self.reset()
+            self.after(2000, self.after_raised)
         elif msg== "Stage1: Win":
             self.informLabel.config(text="묵찌빠를 시작합니다. 당신의 턴입니다.")
-            self.cancel_thread()
-            self.after(3000, self.after_raised)
+            self.reset()
+            self.after(2000, self.after_raised)
         elif msg== "Stage1: Lose":
             self.informLabel.config(text="묵찌빠를 시작합니다. 상대의 턴입니다.")
-            self.cancel_thread()
-            self.after(3000, self.after_raised)
+            self.reset()
+            self.after(2000, self.after_raised)
         return
 
     def start_stage1(self):
@@ -394,6 +393,8 @@ class GamePage(tk.Frame):
     
     def reset(self):
         self.cancel_progrssThread()
+        self.cancel_thread()
+        self.controller.shared_data["timeOutCount"].set(0)
 
 
 
