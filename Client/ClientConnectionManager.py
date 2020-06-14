@@ -28,6 +28,7 @@ class ClientConnectionManager:
         if self.socketMade:
             try:
                 self.clientSocket.send(message.encode())
+                print("Message Sent: <" + message + ">" )
                 return True
             except error:
                 return False
@@ -39,8 +40,9 @@ class ClientConnectionManager:
     def receive_message(self):
         if self.socketMade:
             try:
-                msg = self.clientSocket.recv(1024)
-                return msg.decode()
+                msg = self.clientSocket.recv(1024).decode
+                print("Received: <" + msg + ">")
+                return msg
             except timeout:
                 return None
         else:

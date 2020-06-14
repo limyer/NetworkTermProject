@@ -187,7 +187,7 @@ class ConnectionPage(tk.Frame):
 
         # 실제로 메시지 수신
         msg = connectionManager.receive_message()
-        print(msg)
+ 
 
         # 서버가 두 명이 접속하여 성공했음을 알림
         if msg == STAGE0TO1CODE:
@@ -297,7 +297,7 @@ class GamePage(tk.Frame):
         username = self.controller.shared_data["username"].get()
 
         msg = connectionManager.receive_message()
-        print(msg)
+
 
         # 서버가 게임 시작을 알림
         if msg == STAGE1STARTCODE:
@@ -324,7 +324,7 @@ class GamePage(tk.Frame):
     def receive_code(self):
         connectionManager = self.controller.shared_data["connectionManager"]
         msg = connectionManager.receive_message()
-        print(msg)
+
         
         if msg == "Stage1: Draw":
             self.informLabel.config(text="비겼습니다. 다시 가위바위보를 시작합니다.")
@@ -339,7 +339,7 @@ class GamePage(tk.Frame):
             self.informLabel.config(text="묵찌빠를 시작합니다. 상대의 턴입니다.")
             self.after(3000, self.start_stage1())
         else:
-            self.controller.shared_data["cancelID"] = self.after(100, self.receive_result)
+            self.controller.shared_data["cancelID"] = self.after(100, self.receive_code)
         self.cancel_thread()
         return
 
