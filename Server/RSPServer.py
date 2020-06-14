@@ -178,13 +178,14 @@ class RSPServer:
                             self.connectionManager.send_message(clientSocket, STAGE1WINCODE)
                         elif result == "Lose":
                             self.connectionManager.send_message(clientSocket, STAGE1LOSECODE)
-                        self.connectionManager.send_message(clientSocket, STAGE1TO2CODE)
-                        print("Stage 1 end")
-                        RSPServer.endStage1Flag = True
                         time.sleep(3)
-                        RSPServer.stage = 2
-                        RSPServer.endStage2Flag = False
-                        RSPServer.startStageFlag = True
+                        # self.connectionManager.send_message(clientSocket, STAGE1TO2CODE)
+                        # print("Stage 1 end")
+                        # RSPServer.endStage1Flag = True
+                        # time.sleep(3)
+                        # RSPServer.stage = 2
+                        # RSPServer.endStage2Flag = False
+                        # RSPServer.startStageFlag = True
                     RSPServer.playerInputReceived = [False, False]
                     RSPServer.playerInput = ["", ""]
         return
