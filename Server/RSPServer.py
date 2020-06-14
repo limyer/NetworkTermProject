@@ -144,12 +144,13 @@ class RSPServer:
                 index = RSPServer.usernameList.index(username)
                 self.remove_from_list(index)
         return
-    
+
+
     def stage1(self, clientSocket, username):
         if not RSPServer.endStage1Flag:
             print(username + " is in Stage 1")
+            RSPServer.connectionCount += 1
             if RSPServer.startStageFlag:
-                RSPServer.connectionCount += 1
                 self.connectionManager.send_message(clientSocket, STAGE1STARTCODE)
                 if RSPServer.connectionCount == 2:
                     RSPServer.startStageFlag = False
@@ -179,6 +180,9 @@ class RSPServer:
                     result = self.stage1_result(index)
                     if result == "Draw":
                         self.connectionManager.send_message(clientSocket, STAGE1DRAWCODE)
+                        if RSPServer.connectionCount == 2:
+                            RSPServer.startStageFlag = True
+                            RSPServer.connectionCount = 0
                     else:
                         if result == "Win":
                             self.connectionManager.send_message(clientSocket, STAGE1WINCODE)

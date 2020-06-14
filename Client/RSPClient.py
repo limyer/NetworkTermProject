@@ -325,22 +325,25 @@ class GamePage(tk.Frame):
         connectionManager = self.controller.shared_data["connectionManager"]
         msg = connectionManager.receive_message()
 
-        
         if msg == "Stage1: Draw":
             self.informLabel.config(text="비겼습니다. 다시 가위바위보를 시작합니다.")
-            self.after(3000, self.start_stage1())
+            self.cancel_thread()
+            self.after(3000, self.after_raised)
         elif msg == RESTARTCODE:
             self.informLabel.config(text="다시 가위바위보를 시작합니다.")
-            self.after(3000, self.start_stage1())
+            self.cancel_thread()
+            self.after(3000, self.after_raised)
         elif msg== "Stage1: Win":
             self.informLabel.config(text="묵찌빠를 시작합니다. 당신의 턴입니다.")
-            self.after(3000, self.start_stage1())
+            self.cancel_thread()
+            self.after(3000, self.after_raised)
         elif msg== "Stage1: Lose":
             self.informLabel.config(text="묵찌빠를 시작합니다. 상대의 턴입니다.")
-            self.after(3000, self.start_stage1())
+            self.cancel_thread()
+            self.after(3000, self.after_raised)
         else:
             self.controller.shared_data["cancelID"] = self.after(100, self.receive_code)
-        self.cancel_thread()
+        
         return
 
     def start_stage1(self):
