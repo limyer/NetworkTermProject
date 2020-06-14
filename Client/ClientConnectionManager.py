@@ -1,3 +1,5 @@
+#-*- coding:utf-8 -*-
+
 from socket import *
 
 # 서버 연결 매니저 (Client Side)

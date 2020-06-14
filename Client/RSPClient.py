@@ -1,3 +1,5 @@
+#-*- coding:utf-8 -*-
+
 from socket import*
 from ClientConnectionManager import *
 import tkinter as tk
@@ -12,8 +14,9 @@ PORT = 12000
 BREAKCODE = 'Break' # (Code: "Break") 
 STAGE0TO1CODE = 'Stage 0 to 1' # (Code: "Stage 0 to 1")
 USERNAMECODE = 'Username: ' # (Code: "Username: " + username)
-REWRITECODE = "Rewrite"
+REWRITECODE = 'Rewrite'
 STAGE1STARTCODE = 'Receiving Stage 1'
+CANCELCODE = 'Cancel'
 TIMEOUT = 70
 
 # RSP 클라이언트
@@ -224,6 +227,7 @@ class ConnectionPage(tk.Frame):
     def cancel_connection(self):
         self.cancel_thread()
         self.controller.show_frame("StartPage")
+        self.controller.shared_data["connectionManager"].send_message(CANCELCODE)
         self.controller.shared_data["usernameLabel"].set("유저 이름을 입력해주세요")
         self.controller.shared_data["connectionManager"].close_socket()
 
@@ -310,7 +314,7 @@ class GamePage(tk.Frame):
             self.controller.show_frame("ErrorPage")
             self.controller.shared_data["connected"] = False
         return
-        
+
     def receive_code(self):
         return
 

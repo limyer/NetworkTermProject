@@ -1,6 +1,7 @@
 from socket import *
 from RSPServer import *
 
+
 BREAKCODE = 'Break' # (Code: "Break") 
 STAGE0TO1CODE = 'Stage 0 to 1' # (Code: "Stage 0 to 1")
 RESTARTCODE = 'Restart' # (Code: "Restart")
@@ -18,52 +19,6 @@ class ServerConnectionManager:
         self.serverSocket.listen(2)
         self.socketMade = True
 
-    def accept_socket(self):
-        try:
-            clientSocket, addr = self.serverSocket.accept()
-            clientSocket.settimeout(30)
-            print('Connected by:', addr[0], ':', addr[1])
-            clientThread = self.make_client_thread(clientSocket)
-            return clientThread
-        except error:
-            return "None"
-
-    def make_client_thread(self, clientSocket):
-        if len(RSPServer.threadList) >= 2:
-            self.receive_message(clientSocket)
-            self.send_message(clientSocket, BREAKCODE)
-            clientSocket.close()
-            return "None"
-        else:
-            username = self.get_username(clientSocket)
-            if username == None:
-                return "None"
-            while True:
-                if username in RSPServer.usernameList:
-                    self.send_message(clientSocket, REWRITECODE)
-                    username = self.get_username(clientSocket)
-                    if username == None:
-                        return "None"
-                else:
-                    break
-            RSPServer.usernameList.append(username)
-            clientThread = threading.Thread(target=RSPServer.game_run, args=(RSPServer, clientSocket, username))
-            return clientThread
-
-    def get_username(self, clientSocket):
-        # (Code: "Username: " + username)
-        usernameRaw = self.receive_message(clientSocket)
-        if usernameRaw != None:
-            username = usernameRaw.split()[1]
-            return username
-        else:
-            return None
-
-
-    def run_client_thread(self, clientThread):
-        clientThread.daemon = True
-        clientThread.run()
-        
 
 
     # 메시지 전달 함수
@@ -72,6 +27,7 @@ class ServerConnectionManager:
         if self.socketMade:
             try:
                 clientSocket.send(message.encode())
+                print("Message Sent: <" + message + ">" )
                 return True
             except error:
                 return False
@@ -84,7 +40,7 @@ class ServerConnectionManager:
         if self.socketMade:
             try:
                 msg = clientSocket.recv(1024).decode()
-                print("Received: " + msg)
+                print("Received: <" + msg + ">")
                 return msg
             except timeout:
                 return None
