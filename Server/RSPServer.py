@@ -36,6 +36,7 @@ class RSPServer:
     endStage1Flag = False
     endStage2Flag = False
     startStageFlag = True
+    restartFlag = False
     playerInput = ["", ""]
     playerInputReceived = [False, False]
     currentPlayerTurn = [False, False]
@@ -162,12 +163,11 @@ class RSPServer:
                 msg = msg.split()
                 index = RSPServer.usernameList.index(username)
                 if len(msg) == 2 and not RSPServer.playerInputReceived[index]:
-                    RSPServer.connectionCount += 1
                     if msg[1] == UNDECIDEDCODE:
-                        self.connectionManager.send_message(clientSocket, RESTARTCODE)
-                        if RSPServer.connectionCount == 2:
-                            RSPServer.playerInputReceived = [False, False]
-                            RSPServer.connectionCount = 0
+                        RSPServer.restartFlag = True
+                        self.stage1_restart(clientSocket)
+                    elif RSPServer.restartFlag:
+                        self.stage1_restart(clientSocket)
                     else:
                         if msg[1] == ROCKCODE:
                             RSPServer.playerInput[index] = ROCKCODE
@@ -180,9 +180,6 @@ class RSPServer:
                     result = self.stage1_result(index)
                     if result == "Draw":
                         self.connectionManager.send_message(clientSocket, STAGE1DRAWCODE)
-                        if RSPServer.connectionCount == 2:
-                            RSPServer.startStageFlag = True
-                            RSPServer.connectionCount = 0
                     else:
                         if result == "Win":
                             self.connectionManager.send_message(clientSocket, STAGE1WINCODE)
@@ -196,11 +193,17 @@ class RSPServer:
                         # RSPServer.stage = 2
                         # RSPServer.endStage2Flag = False
                         # RSPServer.startStageFlag = True
-                    if RSPServer.connectionCount == 2:
-                        RSPServer.playerInputReceived = [False, False]
-                        RSPServer.playerInput = ["", ""]
-                        RSPServer.connectionCount = 0
+                    self.stage1_restart(clientSocket)
         return
+
+    def stage1_restart(self, clientSocket):
+        self.connectionManager.send_message(clientSocket, RESTARTCODE)
+        if RSPServer.connectionCount == 2:
+            RSPServer.startStageFlag = True
+            RSPServer.playerInputReceived = [False, False]
+            RSPServer.playerInput = ["", ""]
+            RSPServer.connectionCount = 0
+            RSPServer.restartFlag = False
 
     def stage1_result(self, index):
         opponentIndex = (1 if index==0 else 0)
