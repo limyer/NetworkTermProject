@@ -21,7 +21,7 @@ class ClientConnectionManager:
             return False
 
     # 메시지 전달 함수
-    # 수신 성공 여부를 Boolean 값으로 반환
+    # 송신 성공 여부를 Boolean 값으로 반환
     def send_message(self, message):
         if self.socketMade:
             try:

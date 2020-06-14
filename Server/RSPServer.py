@@ -2,7 +2,7 @@
 # 최종 수정: 2020 05 15 15:54 - 임예랑
 from socket import *
 from _thread import *
-import random as r
+import time
 import threading
 from ServerConnectionManager import *
 
@@ -12,6 +12,7 @@ PORT = 12000
 BREAKCODE = 'Break' # (Code: "Break") 
 STAGE0TO1CODE = 'Stage 0 to 1' # (Code: "Stage 0 to 1")
 RESTARTCODE = 'Restart' # (Code: "Restart")
+STAGE1STARTCODE = 'Receiving Stage 1'
 
 # RSP서버 클래스
 # 서버의 동작은 전부 여기 정의해주세요
@@ -54,6 +55,14 @@ class RSPServer:
                 print("Stage 0 end")
                 break
         return
+    
+    def stage1(self, clientSocket, username):
+        time.sleep(3)
+        RSPServer.stage = 1
+        self.serverManager.send_message(clientSocket, STAGE0TO1CODE)
+
+
+    
 
 
     

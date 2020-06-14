@@ -38,7 +38,6 @@ class ServerConnectionManager:
             username = self.get_username(clientSocket)
             if username == None:
                 return "None"
-
             while True:
                 if username in RSPServer.usernameList:
                     self.send_message(clientSocket, REWRITECODE)
@@ -47,7 +46,6 @@ class ServerConnectionManager:
                         return "None"
                 else:
                     break
-
             RSPServer.usernameList.append(username)
             clientThread = threading.Thread(target=RSPServer.game_run, args=(RSPServer, clientSocket, username))
             return clientThread
@@ -69,7 +67,7 @@ class ServerConnectionManager:
 
 
     # 메시지 전달 함수
-    # 수신 성공 여부를 Boolean 값으로 반환
+    # 송신 성공 여부를 Boolean 값으로 반환
     def send_message(self, clientSocket, message):
         if self.socketMade:
             try:
@@ -93,7 +91,7 @@ class ServerConnectionManager:
         else:
             return None
 
-    # 소켓이 만들어져 있을 경우 소켓 연결 해제 
+    # 소켓이 만들어져 있을 경우 서버 소켓 해제
     def close_socket(self):
         if self.socketMade:
             self.serverSocket.close()

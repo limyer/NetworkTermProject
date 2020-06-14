@@ -13,6 +13,7 @@ BREAKCODE = 'Break' # (Code: "Break")
 STAGE0TO1CODE = 'Stage 0 to 1' # (Code: "Stage 0 to 1")
 USERNAMECODE = 'Username: ' # (Code: "Username: " + username)
 REWRITECODE = "Rewrite"
+STAGE1STARTCODE = 'Receiving Stage 1'
 TIMEOUT = 70
 
 # RSP 클라이언트
@@ -30,6 +31,7 @@ class RSPClient(tk.Tk):
             "connectionManager": None,
             "connected": False,
             "cancelID": None,
+            "progressbarCancelID": None,
             "count": 1,
             "timeOutCount": tk.IntVar(),
             "connectionLabel":tk.StringVar(),
@@ -281,17 +283,42 @@ class GamePage(tk.Frame):
 
 
     def after_raised(self):
-        self.enable_buttons()
-        self.score_update()
-        self.progressbar.start(100)
-        self.after(1, self.stop_progressbar)
+        count = self.controller.shared_data["count"]
+
+        # 카운트 +1
+        self.controller.shared_data["count"] += 1
+
+        connectionManager = self.controller.shared_data["connectionManager"]
+        username = self.controller.shared_data["username"].get()
+
+        msg = connectionManager.receive_message()
+        print(msg)
+
+        # 서버가 게임 시작을 알림
+        if msg == STAGE0TO1CODE:
+            self.cancel_thread()
+            self.enable_buttons()
+            self.score_update()
+            self.progressbar.start(100)
+            self.after(1, self.stop_progressbar)
+        elif count < TIMEOUT:
+            # 타임아웃 종료까지 1초에 한번 코드를 받음
+            self.controller.shared_data["cancelID"] = self.after(100, self.after_raised)
+        # 타임아웃
+        else:
+            self.cancel_thread()
+            self.controller.show_frame("ErrorPage")
+            self.controller.shared_data["connected"] = False
         return
-    
+        
+    def receive_code(self):
+        return
+
     def stop_progressbar(self):
-        self.controller.shared_data["cancelID"] = self.after(50, self.stop_progressbar)
+        self.controller.shared_data["progressbarCancelID"] = self.after(50, self.stop_progressbar)
         if self.controller.shared_data["timeOutCount"].get() == 99:
             self.progressbar.stop()
-            self.cancel_thread()
+            self.cancel_progrssThread()
             self.controller.shared_data["timeOutCount"].set(0)
             self.informLabel.config(text="시간 종료! 다른 플레이어를 기다립니다")
             self.disable_buttons()
@@ -317,13 +344,13 @@ class GamePage(tk.Frame):
         self.informLabel.config(text="선택: " + choice.upper() + ", 상대 플레이어의 선택을 기다립니다")
         self.disable_buttons()
 
-    def cancel_thread(self):
-        if self.controller.shared_data["cancelID"] != None:
+    def cancel_progrssThread(self):
+        if self.controller.shared_data["progressbarCancelID"] != None:
             self.after_cancel(self.controller.shared_data["cancelID"])
-            self.controller.shared_data["cancelID"] = None
+            self.controller.shared_data["progressbarCancelID"] = None
     
     def reset(self):
-        self.cancel_thread()
+        self.cancel_progrssThread()
 
 
 
