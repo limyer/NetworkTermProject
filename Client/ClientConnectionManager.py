@@ -1,9 +1,7 @@
 from socket import *
 
-# 서버 연결 매니저
+# 서버 연결 매니저 (Client Side)
 class ClientConnectionManager:
-
-
     # 생성자 매개변수: HOST IP와 PORT 번호
     def __init__(self, HOST, PORT): 
         self.serverHost = HOST
@@ -13,7 +11,6 @@ class ClientConnectionManager:
     # 소켓을 만들고 서버와 연결
     # 타임아웃은 1초
     def make_connection(self):
-
         try:
             self.clientSocket = socket(AF_INET, SOCK_STREAM)
             self.clientSocket.connect((self.serverHost,self.serverPort))

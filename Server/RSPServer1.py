@@ -1,4 +1,4 @@
-from socket import * # 2020-06-13 최환효 업데이트
+from socket import * 
 import threading
 # 라운드 구현 필요
 # 클래스 형식으로 하고 싶었으나 여기는 def안에서 다 돌아가게 작성되어있어 부득이하게 주석으로 표시함

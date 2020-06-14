@@ -9,9 +9,10 @@ import tkinter.ttk
 
 HOST = '127.0.0.1'
 PORT = 12000
-BREAKCODE = 'BREAK'
-OKCODE = 'OK'
-TIMEOUT = 11
+BREAKCODE = 'Break' # (Code: "Break") 
+STAGE0TO1CODE = 'Stage 0 to 1' # (Code: "Stage 0 to 1")
+USERNAMECODE = 'Username: ' # (Code: "Username: " + username)
+TIMEOUT = 70
 
 # RSP 클라이언트
 # Shared_Data에 클라이언트 정보 통합 저장
@@ -149,8 +150,8 @@ class ConnectionPage(tk.Frame):
         count = self.controller.shared_data["count"]
         try:
             # username이 성공적으로 전달 됐을 경우
-            if connectionManager.send_message(self.controller.shared_data["username"].get()):
-                # receivercode 스레드로 재귀 실행 시작
+            if connectionManager.send_message(USERNAMECODE + self.controller.shared_data["username"].get()):
+                # receive_code 스레드로 재귀 실행 시작
                 self.after(1, self.receive_code)
             # 전달 실패 시
             else:
@@ -180,7 +181,7 @@ class ConnectionPage(tk.Frame):
         print(msg)
 
         # 서버가 두 명이 접속하여 성공했음을 알림
-        if msg == OKCODE:
+        if msg == STAGE0TO1CODE:
             self.cancel_thread()
             self.controller.shared_data["connectionLabel"].set("게임 시작 중...")
             # 3초 후에 게임 페이지로 이동
