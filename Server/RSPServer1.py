@@ -12,13 +12,15 @@ t=[] #쓰레드
 score=[0,0]
 clientS=[]
 clientCard=[-5,-5]
+stage=0
+stage1=0
 check = 0 # 두명 모두 값을 입력했는지를 확인
 retry = 0 # 몇번 다시했나 체크 
 attacker = -1 # 공격자 저장
 gameround = 0
 RSP_resultboard=[['draw','win','lose'],['lose','draw','win'],['win','lose','draw']] # 가위바위보 승/무/패 테이블
-player_name = ['',''] # 플레이어 이름 저장
-first = 1 # 처음 시도 했나를 확인 이것을 넣지 않으면 step 2 실행시 enter your card 가 한번더 출력된다
+player_name = ['','']
+
 
 
 
@@ -26,12 +28,12 @@ def socketThread():
     global index
     global clientS
     global clientCard
+    global stage1
     global score
     global check
     global retry
     global gameround
     global player_name
-    global first
     clientSocket,addr=serverSocket.accept()
     playerNumber=index
     clientS.append(clientSocket)
@@ -94,7 +96,7 @@ def socketThread():
         print('step 2')
         while True:
             print(retry)
-            if retry == 0 and first != 1:
+            if retry == 0:
                 clientSocket.send('enter your card'.encode())
             else:
                 pass
@@ -114,7 +116,6 @@ def socketThread():
                     clientSocket.send('you are attacker\n enter your card'.encode())
                 else:
                     clientSocket.send('you are deffender\n enter your card'.encode())
-                first = 0
                 continue
             
             elif res == 'lose':
@@ -124,7 +125,6 @@ def socketThread():
                     clientSocket.send('you are deffender\n enter your card'.encode())
                 else:
                     clientSocket.send('you are attacker\n enter your card'.encode())
-                first = 0
                 continue
                 
             elif res == 'draw':
@@ -149,18 +149,17 @@ def socketThread():
         # 초기화
         check = 0
         retry = 0
-        first = 1
         
         # 누가 이겼는지 출력 구현필요
         if score[0] == 4:
             print(f'player 1 win!')
-            winner = player_name[0] + ' win the game'
+            winner = player_name[0] + 'win the game'
             clientSocket.send(winner.encode())
             break
         
         elif score[1] == 4:
             print(f'player 2 win!')
-            winner = player_name[1] + ' win the game'
+            winner = player_name[1] + 'win the game'
             clientSocket.send(winner.encode())
             break
     
