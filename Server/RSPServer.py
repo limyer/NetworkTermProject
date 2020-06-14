@@ -8,6 +8,7 @@ from ServerConnectionManager import *
 
 HOST = ''
 PORT = 12000
+TIMEOUT = 30
 
 BREAKCODE = 'Break' # (Code: "Break") 
 STAGE0TO1CODE = 'Stage 0 to 1' # (Code: "Stage 0 to 1")
@@ -25,21 +26,22 @@ STAGE1DRAWCODE = 'Stage1: Draw'
 STAGE1LOSECODE = 'Stage1: Lose'
 
 # RSP서버 클래스
-# 서버의 동작은 전부 여기 정의해주세요
 class RSPServer:
-    stage=0
-    connectionCount = 0
-    threadList = []
-    usernameList = []
-    addressList = []
-    endStage0Flag = False
-    endStage1Flag = False
-    endStage2Flag = False
-    startStageFlag = True
-    restartFlag = False
-    playerInput = ["", ""]
-    playerInputReceived = [False, False]
-    currentPlayerTurn = [False, False]
+    stage=0 # 현재 스테이지
+    connectionCount = 0 # 코드 두개 보내졌는지 확인용
+    threadList = [] # 현재 스레드 리스트
+    usernameList = [] # 유저 이름 리스트
+    addressList = [] # IP 주소 리스트
+    endStage0Flag = False # Stage0 끝났는지 확인
+    endStage1Flag = False # Stage1 끝났는지 확인
+    endStage2Flag = False # Stage2 끝났는지 확인
+    startStageFlag = True # Stage의 시작인지 확인
+    restartFlag = False # 재시작 플래그
+    playerInput = ["", ""] # 서버가 받은 player 입력
+    playerInputReceived = [False, False] # 플레이어의 입력을 받았는지 확인 여부
+    stage1Result = ["", ""] # Stage1에서 결과
+    currentPlayerTurn = [False, False] # 현재 누구 턴인지
+    
 
     def __init__(self):
         self.connectionManager = ServerConnectionManager(HOST, PORT)
@@ -48,65 +50,93 @@ class RSPServer:
     def end_server(self):
         self.connectionManager.close_socket()
 
+    # 소켓을 열고 클라이언트 쓰레드 생성
     def open_socket(self):
         print('waiting to be connected\n')
+        # 소켓을 받고 쓰레드를 함수 실행
         clientThread = self.accept_socket()
+        # 쓰레드가 널이 아닐 경우
         if clientThread != "None" or clientThread != None:
+            # 리스트에 쓰레드 추가
             RSPServer.threadList.append(clientThread)
+            # 쓰레드 실행
             self.run_client_thread(clientThread)
             print(RSPServer.threadList)
             return
         return
 
+    # 소켓을 받고 쓰레드를 만드는 함수
     def accept_socket(self):
         try:
             clientSocket, addr = self.connectionManager.serverSocket.accept()
-            clientSocket.settimeout(30)
+            # 타임아웃 내로 응답 없을시 소켓 닫힘
+            clientSocket.settimeout(TIMEOUT)
             print('Connected by:', addr[0], ':', addr[1])
+            index = RSPServer.addressList.index(addr[0])
+            # IP 주소가 이미 리스트에 존재할 경우
             if addr[0] in RSPServer.addressList:
                 print("Reconnection Occured, Restarting Thread")
-                index = RSPServer.addressList.index(addr[0])
+                # 리스트에서 삭제 후 연결
                 self.remove_from_list(index)
-            clientThread = self.make_client_thread(clientSocket)
-            RSPServer.addressList.append(addr[0])
+            # 실제로 쓰레드를 만드는 작업 시작
+            clientThread = self.make_client_thread(clientSocket, index)
+            # IP 주소 리스트에 추가
+            if clientThread != "None":
+                RSPServer.addressList.append(addr[0])
             return clientThread
         except error:
             return "None"
 
-    def make_client_thread(self, clientSocket):
+    # 실제로 쓰레드가 만들어지는 함수
+    def make_client_thread(self, clientSocket, index):
+        # 쓰레드 리스트가 2개 이상 요소를 가질 경우
         if len(RSPServer.threadList) >= 2:
+            # 유저이름을 먼저 받고
             self.connectionManager.receive_message(clientSocket)
+            # Break 코드 전송후 소켓 해제
             self.connectionManager.send_message(clientSocket, BREAKCODE)
             clientSocket.close()
             return "None"
+        # 2개 이하일 경우
         else:
             username = self.get_username(clientSocket)
+            # 유저 이름이 ""로 들어오거나 중복될 경우
             if username == None or username in RSPServer.usernameList:
+                # REWRITE 코드 전송
                 self.connectionManager.send_message(clientSocket, REWRITECODE)
+                # 재시작
                 self.open_socket()
                 return "None"
 
+            # 유저이름 리스트에 추가
             RSPServer.usernameList.append(username)
+            # 실제로 쓰레드 만들기
             clientThread = threading.Thread(target=self.game_run, args=(clientSocket, username))
             return clientThread
 
+    # 유저이름을 헤더를 떼고 리턴하는 함수
     def get_username(self, clientSocket):
         # (Code: "Username: " + username)
         usernameRaw = self.connectionManager.receive_message(clientSocket)
+
         if usernameRaw != "Username: ":
             username = usernameRaw.split()[1]
             return username
+        # 유저 이름이 빈 공간으로 왔을 경우
         else:
             return None
 
+    # 쓰레드 실행 함수
     def run_client_thread(self, clientThread):
         clientThread.daemon = True
         clientThread.start()
     
+    # 쓰레드 타겟 함수
     def game_run(self, clientSocket, username):
         try:
             print("Thread start\n")
             RSPServer.stage = 0
+            # 유저이름이 삭제되면 쓰레드 종료
             while username in RSPServer.usernameList:
                 time.sleep(0.5)
                 if RSPServer.stage == 0:
@@ -129,7 +159,6 @@ class RSPServer:
 
     def stage0(self, clientSocket, username):
         if not RSPServer.endStage0Flag:
-            print(username + " is in Stage 0")
             if (len(RSPServer.threadList)) == 2:
                 self.connectionManager.send_message(clientSocket, STAGE0TO1CODE)
                 RSPServer.connectionCount += 1
@@ -148,96 +177,143 @@ class RSPServer:
 
 
     def stage1(self, clientSocket, username):
+        # 스테이지 1 끝내는 플래그 (True일 경우 stage1 끝)
         if not RSPServer.endStage1Flag:
-            print(username + " is in Stage 1")
+            # Receiving Stage 1으로 싱크 확인 플래그
             if RSPServer.startStageFlag:
+                # 스테이지 1 시작코드 전송
                 self.connectionManager.send_message(clientSocket, STAGE1STARTCODE)
                 RSPServer.connectionCount += 1
                 if RSPServer.connectionCount == 2:
                     RSPServer.startStageFlag = False
                     RSPServer.connectionCount = 0
+
             else:
-                msg = self.connectionManager.receive_message(clientSocket)
-                if msg == None or "":
-                    return    
-                msg = msg.split()
                 index = RSPServer.usernameList.index(username)
-                if len(msg) == 2 and not RSPServer.playerInputReceived[index]:
-                    if msg[1] == UNDECIDEDCODE:
-                        RSPServer.connectionCount += 1
-                        RSPServer.restartFlag = True
-                        self.stage1_restart(clientSocket)
-                    elif RSPServer.restartFlag:
-                        RSPServer.connectionCount += 1
-                        self.stage1_restart(clientSocket)
-                    else:
-                        if msg[1] == ROCKCODE:
-                            RSPServer.playerInput[index] = ROCKCODE
-                        elif msg[1] == SCISSORSCODE:
-                            RSPServer.playerInput[index] = SCISSORSCODE
-                        elif msg[1] == PAPERCODE:
-                            RSPServer.playerInput[index] = PAPERCODE
-                        RSPServer.playerInputReceived[index] = True
-                elif RSPServer.playerInputReceived == [True, True]:
+                opponentIndex = (1 if index==0 else 0)
+
+                # 상대 클라와 내 클라 둘 다 입력을 끝냈을 때
+                if RSPServer.playerInputReceived[index] and RSPServer.playerInputReceived[opponentIndex]:
                     RSPServer.connectionCount += 1
-                    result = self.stage1_result(index)
-                    if result == "Draw":
+                    myChoice = RSPServer.playerInput[index]
+                    oppChoice = RSPServer.playerInput[opponentIndex]
+
+                    # 결과 계산
+                    if myChoice == oppChoice:
+                        RSPServer.stage1Result[index] = "Draw"
+                    elif myChoice == ROCKCODE:
+                        if oppChoice == SCISSORSCODE:
+                            RSPServer.stage1Result[index] = "Win"
+                        elif oppChoice == PAPERCODE:
+                            RSPServer.stage1Result[index] = "Lose"
+                    elif myChoice == SCISSORSCODE:
+                        if oppChoice == PAPERCODE:
+                            RSPServer.stage1Result[index] = "Win"
+                        elif oppChoice == ROCKCODE:
+                            RSPServer.stage1Result[index] = "Lose"
+                    elif myChoice == PAPERCODE:
+                        if oppChoice == ROCKCODE:
+                            RSPServer.stage1Result[index] = "Win"
+                        elif oppChoice == SCISSORSCODE:
+                            RSPServer.stage1Result[index] = "Lose"
+
+                    # 결과
+                    print(username + " " + RSPServer.stage1Result[index])
+
+                    # 결과에 따라 동작
+                    # 무승부일 때 스테이지 재시작
+                    if RSPServer.stage1Result[index] == "Draw":
                         self.connectionManager.send_message(clientSocket, STAGE1DRAWCODE)
+                        if RSPServer.connectionCount == 2:
+                            RSPServer.startStageFlag = True
+                            RSPServer.playerInputReceived = [False, False]
+                            RSPServer.playerInput = ["", ""]
+                            RSPServer.connectionCount = 0
+                            RSPServer.restartFlag = False
+                    # 누군가의 승리일 때 스테이지 2로 이동
                     else:
-                        if result == "Win":
+                        if RSPServer.stage1Result[index] == "Win":
                             self.connectionManager.send_message(clientSocket, STAGE1WINCODE)
-                        elif result == "Lose":
+                        elif RSPServer.stage1Result[index] == "Lose":
                             self.connectionManager.send_message(clientSocket, STAGE1LOSECODE)
-                        # self.connectionManager.send_message(clientSocket, STAGE1TO2CODE)
-                        # print("Stage 1 end")
-                        # RSPServer.endStage1Flag = True
-                        # time.sleep(3)
-                        # RSPServer.stage = 2
-                        # RSPServer.endStage2Flag = False
-                        # RSPServer.startStageFlag = True
-                    if RSPServer.connectionCount == 2:
-                        RSPServer.startStageFlag = True
-                        RSPServer.playerInputReceived = [False, False]
-                        RSPServer.playerInput = ["", ""]
-                        RSPServer.connectionCount = 0
-                        RSPServer.restartFlag = False
+                        # 스테이지 2로 넘어가는 동작
+                        if RSPServer.connectionCount == 2:
+                            RSPServer.startStageFlag = True
+                            RSPServer.playerInputReceived = [False, False]
+                            RSPServer.playerInput = ["", ""]
+                            RSPServer.connectionCount = 0
+                            RSPServer.restartFlag = False
+                            time.sleep(2)
+                            self.connectionManager.send_message(clientSocket, STAGE1TO2CODE)
+                            print("Stage 1 end")
+                            RSPServer.endStage1Flag = True
+                            RSPServer.stage = 2
+                            RSPServer.endStage2Flag = False
+                            RSPServer.startStageFlag = True
+
+                    
+                    # 2초 슬립
                     time.sleep(2)
+
+                # 상대 클라와 내 클라 둘 중에 하나가 입력을 끝냈을 때
+                elif RSPServer.playerInputReceived[index] or RSPServer.playerInputReceived[opponentIndex]:
+                    # RestartFlag가 살아있을 경우
+                    if RSPServer.restartFlag:
+                        # RESTART 코드 전송
+                        self.connectionManager.send_message(clientSocket, RESTARTCODE)
+                        RSPServer.connectionCount += 1
+                        if RSPServer.connectionCount == 2:
+                            RSPServer.startStageFlag = True
+                            RSPServer.playerInputReceived = [False, False]
+                            RSPServer.playerInput = ["", ""]
+                            RSPServer.connectionCount = 0
+                            RSPServer.restartFlag = False
+                    return
+
+                # 상대 클라와 내 클라 둘 다 입력을 하지 않았을 때
+                else:
+                    # RestartFlag가 살아있을 경우
+                    if RSPServer.restartFlag:
+                        # RESTART 코드 전송
+                        self.connectionManager.send_message(clientSocket, RESTARTCODE)
+                        RSPServer.connectionCount += 1
+                        if RSPServer.connectionCount == 2:
+                            RSPServer.startStageFlag = True
+                            RSPServer.playerInputReceived = [False, False]
+                            RSPServer.playerInput = ["", ""]
+                            RSPServer.connectionCount = 0
+                            RSPServer.restartFlag = False
+                        return
+
+                    # 메시지를 받음
+                    msg = self.connectionManager.receive_message(clientSocket)
+                    
+                    # 받은 메시지가 비어있으면 리턴
+                    if msg == None or "":
+                        return    
+
+                    # 공백 기준으로 자름
+                    msg = msg.split()
+                    
+                    # 잘라서 두개의 요소가 나오고 내 입력이 비어있을 경우
+                    if len(msg) == 2 and not RSPServer.playerInputReceived[index]:
+                        # Undecided 코드가 오면 Restart 플래그를 세움
+                        if msg[1] == UNDECIDEDCODE:
+                            RSPServer.restartFlag = True
+                        else:
+                            if msg[1] == ROCKCODE:
+                                RSPServer.playerInput[index] = ROCKCODE
+                            elif msg[1] == SCISSORSCODE:
+                                RSPServer.playerInput[index] = SCISSORSCODE
+                            elif msg[1] == PAPERCODE:
+                                RSPServer.playerInput[index] = PAPERCODE
+                            # 입력이 되었다고 저장
+                            RSPServer.playerInputReceived[index] = True
+                            print("Player Input : " + str(RSPServer.playerInputReceived))              
         return
-
-    def stage1_restart(self, clientSocket):
-        self.connectionManager.send_message(clientSocket, RESTARTCODE)
-        if RSPServer.connectionCount == 2:
-            RSPServer.startStageFlag = True
-            RSPServer.playerInputReceived = [False, False]
-            RSPServer.playerInput = ["", ""]
-            RSPServer.connectionCount = 0
-            RSPServer.restartFlag = False
-
-    def stage1_result(self, index):
-        opponentIndex = (1 if index==0 else 0)
-        myChoice = RSPServer.playerInput[index]
-        oppChoice = RSPServer.playerInput[opponentIndex]
-        if myChoice == oppChoice:
-            return "Draw"
-        elif myChoice == ROCKCODE:
-            if oppChoice == SCISSORSCODE:
-                return "Win"
-            elif oppChoice == PAPERCODE:
-                return "Lose"
-        elif myChoice == SCISSORSCODE:
-            if oppChoice == PAPERCODE:
-                return "Win"
-            elif oppChoice == ROCKCODE:
-                return "Lose"
-        elif myChoice == PAPERCODE:
-            if oppChoice == ROCKCODE:
-                return "Win"
-            elif oppChoice == SCISSORSCODE:
-                return "Lose"
 
 
     def stage2(self, clientSocket, username):
-        print(username + " is in Stage 2")
         time.sleep(3)
         RSPServer.stage = 2
         print("Server End")
