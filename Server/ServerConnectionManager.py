@@ -3,6 +3,7 @@ from RSPServer import *
 
 BREAKCODE = 'Break' # (Code: "Break") 
 STAGE0TO1CODE = 'Stage 0 to 1' # (Code: "Stage 0 to 1")
+RESTARTCODE = 'Restart' # (Code: "Restart")
 
 # 서버 연결 매니저 (Server Side)
 class ServerConnectionManager:

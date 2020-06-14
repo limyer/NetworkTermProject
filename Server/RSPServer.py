@@ -9,6 +9,8 @@ from ServerConnectionManager import *
 HOST = ''
 PORT = 12000
 
+BREAKCODE = 'Break' # (Code: "Break") 
+STAGE0TO1CODE = 'Stage 0 to 1' # (Code: "Stage 0 to 1")
 RESTARTCODE = 'Restart' # (Code: "Restart")
 
 # RSP서버 클래스
