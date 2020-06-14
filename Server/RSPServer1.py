@@ -19,7 +19,7 @@ retry = 0 # 몇번 다시했나 체크
 attacker = -1 # 공격자 저장
 gameround = 0
 RSP_resultboard=[['draw','win','lose'],['lose','draw','win'],['win','lose','draw']] # 가위바위보 승/무/패 테이블
-
+player_name = ['','']
 
 
 
@@ -29,9 +29,11 @@ def socketThread():
     global clientS
     global clientCard
     global stage1
+    global score
     global check
     global retry
     global gameround
+    global player_name
     clientSocket,addr=serverSocket.accept()
     playerNumber=index
     clientS.append(clientSocket)
@@ -41,6 +43,7 @@ def socketThread():
     name=clientSocket.recv(2048).decode() #이름 지정
     print(f'player {playerNumber+1} name: {name}')
     index+=1
+    player_name[playerNumber] = name
     print(index)
     
     while True:
@@ -49,7 +52,7 @@ def socketThread():
             break
 
     #step 1 선후공 결정
-    for gameround in range(3)
+    for gameround in range(3):
         print('step 1')
         while True:
             if retry == 0:
@@ -88,6 +91,7 @@ def socketThread():
         # 초기화
         check = 0
         retry = 0
+        
         # step 2 승패 결정
         print('step 2')
         while True:
@@ -128,28 +132,36 @@ def socketThread():
                 if attacker == 0:
                     score[0] += 1
                     if playerNumber == 0:
-                        clientSocket.send('You win!'.encode())
+                        clientSocket.send('You win!\n'.encode())
                     else:
-                        clientSocket.send('You lose'.encode())
+                        clientSocket.send('You lose\n'.encode())
                 elif attacker == 1:
                     score[1] +=1
                     if playerNumber == 0:
-                        clientSocket.send('You lose'.encode())
+                        clientSocket.send('You lose\n'.encode())
                     else:
-                        clientSocket.send('You win!'.encode())
+                        clientSocket.send('You win!\n'.encode())
                 break
-        if score[0] == 2:
-            print(f'player 1 win!')
-            clientSocket.send('player 1 win!')
-            break
-        elif score[1] == 2:
-            print(f'player 2 win!')
-            clientSocket.send('player 2 win!')
-            break
             
-        
+            
+        print(score)
         print('round fin')
-    # 누가 이겼는지 출력 구현필요
+        # 초기화
+        check = 0
+        retry = 0
+        
+        # 누가 이겼는지 출력 구현필요
+        if score[0] == 4:
+            print(f'player 1 win!')
+            winner = player_name[0] + 'win the game'
+            clientSocket.send(winner.encode())
+            break
+        
+        elif score[1] == 4:
+            print(f'player 2 win!')
+            winner = player_name[1] + 'win the game'
+            clientSocket.send(winner.encode())
+            break
     
 # 받은 data를 str에서 int로 바꾸어 준다            
 def return_int(data):
@@ -170,4 +182,3 @@ while i<2:
     i+=1
     print('i: ',i)
 print('RSP game set fin')
-
