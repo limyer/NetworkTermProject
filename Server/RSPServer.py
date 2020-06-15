@@ -55,6 +55,7 @@ class RSPServer:
     stage1Result = ["", ""] # Stage1에서 결과
     stage2Result = ["", ""]
     currentPlayerTurn = [False, False] # 현재 누구 턴인지
+    finalDecided = False
 
     
 
@@ -247,22 +248,18 @@ class RSPServer:
                             RSPServer.connectionCount = 0
                             RSPServer.restartFlag = False
                     # 누군가의 승리일 때 스테이지 2로 이동
-                    else:
+                    elif not RSPServer.Stage1to2Flag:
                         if RSPServer.stage1Result[index] == "Win":
                             self.connectionManager.send_message(clientSocket, STAGE1WINCODE)
                             RSPServer.currentPlayerTurn[index] = True
-                            RSPServer.connectionCount += 1
-                            if RSPServer.connectionCount == 2:
-                                RSPServer.connectionCount = 0
-                                RSPServer.Stage1to2Flag = True
                         elif RSPServer.stage1Result[index] == "Lose":
                             self.connectionManager.send_message(clientSocket, STAGE1LOSECODE)
                             RSPServer.currentPlayerTurn[index] = False
-                            RSPServer.connectionCount += 1
-                            if RSPServer.connectionCount == 2:
-                                RSPServer.connectionCount = 0
-                                RSPServer.Stage1to2Flag = True
-                    if RSPServer.Stage1to2Flag:
+                        RSPServer.connectionCount += 1
+                        if RSPServer.connectionCount == 2:
+                            RSPServer.connectionCount = 0
+                            RSPServer.Stage1to2Flag = True
+                    elif RSPServer.Stage1to2Flag:
                         self.connectionManager.send_message(clientSocket, STAGE1TO2CODE)
                         # 스테이지 2로 넘어가는 동작
                         RSPServer.connectionCount += 1
@@ -427,30 +424,32 @@ class RSPServer:
                             RSPServer.restartFlag = False
                     # 누군가의 승리일 때 스코어 변경
                     else:
-                        if RSPServer.stage2Result[index] == "Win":
-                            self.connectionManager.send_message(clientSocket, STAGE2WINCODE)
+                        if not RSPServer.finalDecided:
+                            if RSPServer.stage2Result[index] == "Win":
+                                self.connectionManager.send_message(clientSocket, STAGE2WINCODE)
 
-                        elif RSPServer.stage2Result[index] == "Lose":
-                            self.connectionManager.send_message(clientSocket, STAGE2LOSECODE)
+                            elif RSPServer.stage2Result[index] == "Lose":
+                                self.connectionManager.send_message(clientSocket, STAGE2LOSECODE)
 
-                        RSPServer.connectionCount += 1
-                        if RSPServer.connectionCount == 2:
-                            RSPServer.scoreList[index] += 1
-                            RSPServer.startStageFlag = True
-                            RSPServer.playerInputReceived = [False, False]
-                            RSPServer.playerInput = ["", ""]
-                            RSPServer.connectionCount = 0
-                            RSPServer.restartFlag = False
-                            print("Stage 2 end")
-                            RSPServer.endStage0Flag = False
-                            RSPServer.stage = 1
-                            RSPServer.endStage2Flag = True
-                            RSPServer.startStageFlag = True
-                            RSPServer.turnInformFlag = True
-                        time.sleep(3)
+                            RSPServer.connectionCount += 1
+                            if RSPServer.connectionCount == 2:
+                                RSPServer.scoreList[index] += 1
+                                if RSPServer.scoreList[index] == WINNINGSCORE or RSPServer.scoreList[opponentIndex] == WINNINGSCORE:
+                                    RSPServer.finalDecided = True
+                                RSPServer.startStageFlag = True
+                                RSPServer.playerInputReceived = [False, False]
+                                RSPServer.playerInput = ["", ""]
+                                RSPServer.connectionCount = 0
+                                RSPServer.restartFlag = False
+                                print("Stage 2 end")
+                                RSPServer.endStage0Flag = False
+                                RSPServer.stage = 1
+                                RSPServer.endStage2Flag = True
+                                RSPServer.startStageFlag = True
+                                RSPServer.turnInformFlag = True
 
                         # 최종 승자 발생시
-                        if RSPServer.scoreList[index] == WINNINGSCORE or RSPServer.scoreList[opponentIndex] == WINNINGSCORE:
+                        elif RSPServer.finalDecided:
                             if RSPServer.scoreList[index] == WINNINGSCORE:
                                 self.connectionManager.send_message(clientSocket, FINALWINCODE)
                             elif RSPServer.scoreList[opponentIndex] == WINNINGSCORE:
@@ -467,6 +466,7 @@ class RSPServer:
                                 RSPServer.stage = 0
                                 RSPServer.endStage2Flag = True
                                 RSPServer.startStageFlag = True
+                                RSPServer.finalDecided = False
                             # 쓰레드 연결 해제, 스테이지 0으로 이동
                             self.remove_from_list(index)
 

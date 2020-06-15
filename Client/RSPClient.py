@@ -447,7 +447,7 @@ class Stage2Page(tk.Frame):
         self.progressbar.grid(row=6, column=0, pady=5, columnspan=3)
 
 
-    def afterRaised(self):
+    def after_raised(self):
         if self.controller.shared_data["myTurn"]:
             self.informLabel.config(text="당신의 턴입니다.")
         else:
