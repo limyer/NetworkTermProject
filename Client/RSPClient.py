@@ -449,23 +449,23 @@ class Stage2Page(Stage1Page):
             self.controller.shared_data["cancelID"] = self.after(100, self.after_raised)
         # 타임아웃
         elif count >= TIMEOUT:
-            super().cancel_thread()
+            self.cancel_thread()
             self.controller.show_frame("ErrorPage")
             self.controller.shared_data["connected"] = False
         return
 
     def start_stage2(self):
-        super().enable_buttons()
-        super().score_update()
+        self.enable_buttons()
+        self.score_update()
         self.controller.shared_data["timeOutCount"].set(0)
         self.progressbar.start(100)
-        self.after(1, super().stop_progressbar)
+        self.after(1, self.stop_progressbar)
 
     def choice_made(self, choice):
         connectionManager = self.controller.shared_data["connectionManager"]
         self.informLabel.config(text="선택: " + choice.upper() + ", 상대 플레이어의 선택을 기다립니다")
         connectionManager.send_message("Stage2Input: " + choice)
-        super().disable_buttons()
+        self.disable_buttons()
         self.after(1, self.receive_code)
 
     def receive_code(self):
@@ -476,32 +476,77 @@ class Stage2Page(Stage1Page):
 
         if msg == STAGE2DRAWCODE:
             self.informLabel.config(text="비겼습니다. 다시 묵찌빠를 시작합니다.")
-            super().reset()
+            self.reset()
             self.after(2000, self.after_raised)
         elif msg == RESTARTCODE:
             self.informLabel.config(text="다시 묵찌빠를 시작합니다.")
-            super().reset()
+            self.reset()
             self.after(2000, self.after_raised)
         elif msg== STAGE2WINCODE:
             self.informLabel.config(text="당신의 승리입니다!")
         elif msg== STAGE2LOSECODE:
             self.informLabel.config(text="당신의 패배입니다...")
         elif msg == FINALWINCODE:
-            super().reset()
+            self.reset()
             self.after(2000, lambda: self.controller.show_frame("VictoryPage"))
         elif msg == FINALLOSECODE:
-            super().reset()
+            self.reset()
             self.after(2000, lambda: self.controller.show_frame("DefeatPage"))
         elif msg== STAGE2TO1CODE:
-            super().reset()
+            self.reset()
             self.after(2000, lambda: self.controller.show_frame("Stage1Page"))
         elif msg != None and msg != "":
             msg = msg.split()
             if msg[0] == "Score:":
                 self.controller.shared_data["myScore"] = int(msg[1])
                 self.controller.shared_data["oppScore"] = int(msg[3])
-                super().score_update()
+                self.score_update()
         return
+
+    def stop_progressbar(self):
+        connectionManager = self.controller.shared_data["connectionManager"]
+        self.controller.shared_data["progressbarCancelID"] = self.after(50, self.stop_progressbar)
+        if self.controller.shared_data["timeOutCount"].get() == 99:
+            self.progressbar.stop()
+            self.cancel_progrssThread()
+            self.controller.shared_data["timeOutCount"].set(0)
+            self.informLabel.config(text="시간 종료!")
+            self.disable_buttons()
+            connectionManager.send_message("Stage1Input: Undecided")
+            self.after(1, self.receive_code)
+
+    def score_update(self):
+        score = self.controller.shared_data["score"]
+        myScore = self.controller.shared_data["myScore"]
+        oppScore = self.controller.shared_data["oppScore"]
+        score.set("내 점수: " + str(myScore) + ", 상대 점수 " + str(oppScore))
+    
+    def enable_buttons(self):
+        self.rockButton.config(state="normal")
+        self.scissorsButton.config(state="normal")
+        self.paperButton.config(state="normal")
+
+    def disable_buttons(self):
+        self.rockButton.config(state="disabled")
+        self.scissorsButton.config(state="disabled")
+        self.paperButton.config(state="disabled")
+
+    def cancel_progrssThread(self):
+        if self.controller.shared_data["progressbarCancelID"] != None:
+            self.after_cancel(self.controller.shared_data["progressbarCancelID"])
+            self.controller.shared_data["progressbarCancelID"] = None
+
+    def cancel_thread(self):
+        if self.controller.shared_data["cancelID"] != None:
+            self.after_cancel(self.controller.shared_data["cancelID"])
+            self.controller.shared_data["cancelID"] = None
+            self.controller.shared_data["count"] = 0
+    
+    def reset(self):
+        self.cancel_progrssThread()
+        self.cancel_thread()
+        self.controller.shared_data["timeOutCount"].set(0)
+
 
 
 class VictoryPage(tk.Frame):
