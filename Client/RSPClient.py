@@ -413,12 +413,39 @@ class Stage1Page(tk.Frame):
         self.controller.shared_data["timeOutCount"].set(0)
 
 
-class Stage2Page(Stage1Page):
+class Stage2Page(tk.Frame):
+
 
     def __init__(self, parent, controller):
-        super().__init__(parent, controller)
+        tk.Frame.__init__(self, parent)
         self.controller = controller
-        self.informLabel.config(text="묵찌빠를 시작합니다.")
+        score = self.controller.shared_data["score"]
+
+        # 스코어 라벨
+        self.scoreLabel = tk.Label(self, textvariable=score, font=controller.title_font, width=30)
+        self.scoreLabel.grid(row=0, column=0, pady=10,sticky="n", rowspan=3,columnspan=3)
+
+        # 안내 라벨
+        self.informLabel = tk.Label(self, text="가위 바위 보를 시작합니다")
+        self.informLabel.grid(row=3, column=0, pady=10,sticky="n", rowspan=2,columnspan=3)
+
+        # 가위바위보 버튼
+        self.scissorsButton = tk.Button(self, text="가위", width=10, height=10,
+                           command=lambda: self.choice_made("SCISSORS"), repeatdelay=100)
+        self.scissorsButton.grid(row=5, column=0, sticky="s")
+
+        self.rockButton = tk.Button(self, text="바위",width=10, height=10,
+                           command=lambda: self.choice_made("ROCK"), repeatdelay=100)
+        self.rockButton.grid(row=5, column=1,sticky="s")
+
+        self.paperButton = tk.Button(self, text="보",width=10, height=10,
+                           command=lambda: self.choice_made("PAPER"), repeatdelay=100)
+        self.paperButton.grid(row=5, column=2, sticky="s")
+
+        # 타임아웃 안내 진행바
+        self.progressbar=tkinter.ttk.Progressbar(self, length=300, maximum=100, variable=self.controller.shared_data["timeOutCount"],mode="determinate")
+        self.progressbar.grid(row=6, column=0, pady=5, columnspan=3)
+
 
     def afterRaised(self):
         if self.controller.shared_data["myTurn"]:

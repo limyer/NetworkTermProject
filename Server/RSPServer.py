@@ -47,6 +47,7 @@ class RSPServer:
     endStage1Flag = False # Stage1 끝났는지 확인
     endStage2Flag = False # Stage2 끝났는지 확인
     startStageFlag = True # Stage의 시작인지 확인
+    Stage1to2Flag = False
     restartFlag = False # 재시작 플래그
     turnInformFlag = False #
     playerInput = ["", ""] # 서버가 받은 player 입력
@@ -250,10 +251,18 @@ class RSPServer:
                         if RSPServer.stage1Result[index] == "Win":
                             self.connectionManager.send_message(clientSocket, STAGE1WINCODE)
                             RSPServer.currentPlayerTurn[index] = True
+                            RSPServer.connectionCount += 1
+                            if RSPServer.connectionCount == 2:
+                                RSPServer.connectionCount = 0
+                                RSPServer.Stage1to2Flag = True
                         elif RSPServer.stage1Result[index] == "Lose":
                             self.connectionManager.send_message(clientSocket, STAGE1LOSECODE)
                             RSPServer.currentPlayerTurn[index] = False
-                        time.sleep(3)
+                            RSPServer.connectionCount += 1
+                            if RSPServer.connectionCount == 2:
+                                RSPServer.connectionCount = 0
+                                RSPServer.Stage1to2Flag = True
+                    if RSPServer.Stage1to2Flag:
                         self.connectionManager.send_message(clientSocket, STAGE1TO2CODE)
                         # 스테이지 2로 넘어가는 동작
                         RSPServer.connectionCount += 1
@@ -269,6 +278,7 @@ class RSPServer:
                             RSPServer.endStage2Flag = False
                             RSPServer.startStageFlag = True
                             RSPServer.turnInformFlag  =True
+                            RSPServer.Stage1to2Flag = False
 
 
                     # 2초 슬립
