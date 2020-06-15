@@ -77,6 +77,7 @@ class RSPServer:
             # 쓰레드 실행
             self.run_client_thread(clientThread)
             print(RSPServer.threadList)
+            print(RSPServer.usernameList)
             return
         return
 
@@ -189,8 +190,9 @@ class RSPServer:
                     RSPServer.startStageFlag = True
                     RSPServer.connectionCount = 0
             if self.connectionManager.receive_message(clientSocket) == CANCELCODE:
-                index = RSPServer.usernameList.index(username)
-                self.remove_from_list(index)
+                if username in RSPServer.usernameList
+                    index = RSPServer.usernameList.index(username)
+                    self.remove_from_list(index)
         return
 
 
@@ -209,7 +211,7 @@ class RSPServer:
             else:
                 index = RSPServer.usernameList.index(username)
                 opponentIndex = (1 if index==0 else 0)
-                print("Player Input : " + str(RSPServer.playerInputReceived))
+                print(str(index) + "Player Input : " + str(RSPServer.playerInputReceived))
                 # 상대 클라와 내 클라 둘 다 입력을 끝냈을 때
                 if RSPServer.playerInputReceived[index] and RSPServer.playerInputReceived[opponentIndex]:
                     # RestartFlag가 살아있을 경우
@@ -319,7 +321,7 @@ class RSPServer:
                     msg = self.connectionManager.receive_message(clientSocket)
                     
                     # 받은 메시지가 비어있으면 리턴
-                    if msg == None or "":
+                    if msg == None or msg == "":
                         return 
                     else:
                         # 공백 기준으로 자름
@@ -349,7 +351,7 @@ class RSPServer:
         # 스테이지 2 끝내는 플래그 (True일 경우 stage2 끝)
         if not RSPServer.endStage2Flag:
             
-            print("Player Input : " + str(RSPServer.playerInputReceived))     
+            print(str(index) + "Player Input : " + str(RSPServer.playerInputReceived))     
             # Receiving Stage 2으로 싱크 확인 플래그
             if RSPServer.startStageFlag:
                 # 스테이지 2 시작코드 전송                
@@ -521,7 +523,7 @@ class RSPServer:
                     msg = self.connectionManager.receive_message(clientSocket)
                     
                     # 받은 메시지가 비어있으면 리턴
-                    if msg == None or "":
+                    if msg == None or msg == "":
                         return
                     else:
                         # 공백 기준으로 자름

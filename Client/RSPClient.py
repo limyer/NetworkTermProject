@@ -337,11 +337,9 @@ class Stage1Page(tk.Frame):
         return
 
     def choice_made(self, choice):
-        self.controller.shared_data["choiceMadeFlag"] = True
+        # self.controller.shared_data["choiceMadeFlag"] = True
         connectionManager = self.controller.shared_data["connectionManager"]
         self.informLabel.config(text="선택: " + choice.upper() + ", 상대 플레이어의 선택을 기다립니다")
-        connectionManager.send_message("Stage1Input: " + choice)
-        connectionManager.send_message("Stage1Input: " + choice)
         connectionManager.send_message("Stage1Input: " + choice)
         self.disable_buttons()
         self.after(1, self.receive_code)
@@ -381,7 +379,7 @@ class Stage1Page(tk.Frame):
     def stop_progressbar(self):
         connectionManager = self.controller.shared_data["connectionManager"]
         self.controller.shared_data["progressbarCancelID"] = self.after(50, self.stop_progressbar)
-        if self.controller.shared_data["timeOutCount"].get() == 99 and not self.controller.shared_data["choiceMadeFlag"]:
+        if self.controller.shared_data["timeOutCount"].get() == 99:
             self.progressbar.stop()
             self.cancel_progrssThread()
             self.controller.shared_data["timeOutCount"].set(0)
@@ -421,7 +419,7 @@ class Stage1Page(tk.Frame):
         self.cancel_progrssThread()
         self.cancel_thread()
         self.controller.shared_data["timeOutCount"].set(0)
-        self.controller.shared_data["choiceMadeFlag"] = False
+        # self.controller.shared_data["choiceMadeFlag"] = False
 
 
 class Stage2Page(tk.Frame):
@@ -505,15 +503,13 @@ class Stage2Page(tk.Frame):
         self.after(1, self.stop_progressbar)
 
     def choice_made(self, choice):
-        self.controller.shared_data["choiceMadeFlag"] = True
+        # self.controller.shared_data["choiceMadeFlag"] = True
         connectionManager = self.controller.shared_data["connectionManager"]
         if self.controller.shared_data["myTurn"]:
             self.informLabel.config(text="당신의 턴, 선택: " + choice.upper() + ", 상대 플레이어의 선택을 기다립니다")
         else:
             self.informLabel.config(text="상대의 턴, 선택: " + choice.upper() + ", 상대 플레이어의 선택을 기다립니다")
         self.informLabel.config(text="선택: " + choice.upper() + ", 상대 플레이어의 선택을 기다립니다")
-        connectionManager.send_message("Stage2Input: " + choice)
-        connectionManager.send_message("Stage2Input: " + choice)
         connectionManager.send_message("Stage2Input: " + choice)
         self.disable_buttons()
         self.after(1, self.receive_code)
@@ -555,7 +551,7 @@ class Stage2Page(tk.Frame):
     def stop_progressbar(self):
         connectionManager = self.controller.shared_data["connectionManager"]
         self.controller.shared_data["progressbarCancelID"] = self.after(50, self.stop_progressbar)
-        if self.controller.shared_data["timeOutCount"].get() == 99 and not self.controller.shared_data["choiceMadeFlag"]:
+        if self.controller.shared_data["timeOutCount"].get() == 99:
             self.progressbar.stop()
             self.cancel_progrssThread()
             self.controller.shared_data["timeOutCount"].set(0)
@@ -595,7 +591,7 @@ class Stage2Page(tk.Frame):
         self.cancel_progrssThread()
         self.cancel_thread()
         self.controller.shared_data["timeOutCount"].set(0)
-        self.controller.shared_data["choiceMadeFlag"] = False
+        # self.controller.shared_data["choiceMadeFlag"] = False
 
 
 
@@ -610,10 +606,21 @@ class VictoryPage(tk.Frame):
                            command=lambda: controller.show_frame("StartPage"))
         button.pack()
     
-    def after_raised(self):
+    # 정보 초기화
+
+    def after_raised(self):        
+        self.controller.shared_data["username"].set("")
+        self.controller.shared_data["connected"] = False
+        self.controller.shared_data["cancelID"] = None
+        self.controller.shared_data["count"] = 0
+        # self.controller.shared_data["choiceMadeFlag"] = False
+        self.controller.shared_data["timeOutCount"] = 0
+        self.controller.shared_data["myScore"] = 0
+        self.controller.shared_data["oppScore"] = 0
+        self.controller.shared_data["myTurn"] = False
         return
     
-    # 초기화
+
 
 
 class DefeatPage(tk.Frame):
@@ -627,10 +634,19 @@ class DefeatPage(tk.Frame):
                            command=lambda: controller.show_frame("StartPage"))
         button.pack()
     
-    def after_raised(self):
-        return
-
     # 정보 초기화
+
+    def after_raised(self):        
+        self.controller.shared_data["username"].set("")
+        self.controller.shared_data["connected"] = False
+        self.controller.shared_data["cancelID"] = None
+        self.controller.shared_data["count"] = 0
+        # self.controller.shared_data["choiceMadeFlag"] = False
+        self.controller.shared_data["timeOutCount"] = 0
+        self.controller.shared_data["myScore"] = 0
+        self.controller.shared_data["oppScore"] = 0
+        self.controller.shared_data["myTurn"] = False
+        return
 
 
 class PageTwo(tk.Frame):
