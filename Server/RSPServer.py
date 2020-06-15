@@ -253,6 +253,8 @@ class RSPServer:
                         elif RSPServer.stage1Result[index] == "Lose":
                             self.connectionManager.send_message(clientSocket, STAGE1LOSECODE)
                             RSPServer.currentPlayerTurn[index] = False
+                        time.sleep(3)
+                        self.connectionManager.send_message(clientSocket, STAGE1TO2CODE)
                         # 스테이지 2로 넘어가는 동작
                         RSPServer.connectionCount += 1
                         if RSPServer.connectionCount == 2:
@@ -267,8 +269,7 @@ class RSPServer:
                             RSPServer.endStage2Flag = False
                             RSPServer.startStageFlag = True
                             RSPServer.turnInformFlag  =True
-                        time.sleep(3)
-                        self.connectionManager.send_message(clientSocket, STAGE1TO2CODE)
+
 
                     # 2초 슬립
                     time.sleep(2)

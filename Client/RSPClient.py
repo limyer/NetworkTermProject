@@ -463,6 +463,10 @@ class Stage2Page(Stage1Page):
 
     def choice_made(self, choice):
         connectionManager = self.controller.shared_data["connectionManager"]
+        if self.controller.shared_data["myTurn"]:
+            self.informLabel.config(text="당신의 턴, 선택: " + choice.upper() + ", 상대 플레이어의 선택을 기다립니다")
+        else:
+            self.informLabel.config(text="상대의 턴, 선택: " + choice.upper() + ", 상대 플레이어의 선택을 기다립니다")
         self.informLabel.config(text="선택: " + choice.upper() + ", 상대 플레이어의 선택을 기다립니다")
         connectionManager.send_message("Stage2Input: " + choice)
         self.disable_buttons()
