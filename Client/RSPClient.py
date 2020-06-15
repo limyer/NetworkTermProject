@@ -541,7 +541,7 @@ class Stage2Page(tk.Frame):
                 self.controller.shared_data["oppScore"] = int(msg[3])
                 self.score_update()
                 self.reset()
-                self.after(1, self.controller.show_frame("Stage1Page"))
+                self.after(2000, self.controller.show_frame("Stage1Page"))
         return
 
     def stop_progressbar(self):
