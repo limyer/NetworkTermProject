@@ -34,7 +34,7 @@ STAGE2WINCODE = 'Stage2: Win'
 STAGE2DRAWCODE = 'Stage2: Draw'
 STAGE2LOSECODE = 'Stage2: Lose'
 FINALWINCODE = 'Final: Win'
-FINALLOSECODE = 'Final: LOSE'
+FINALLOSECODE = 'Final: Lose'
 TIMEOUT = 70
 
 # RSP 클라이언트
@@ -473,7 +473,7 @@ class Stage2Page(tk.Frame):
                 self.controller.shared_data["myTurn"] = False
                 
             # 서버가 게임 시작을 알림
-            elif msg[1] == STAGE2STARTCODE:
+            if msg[1] == STAGE2STARTCODE:
                 self.reset()
                 self.start_stage2()
 

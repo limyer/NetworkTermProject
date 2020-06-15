@@ -33,7 +33,7 @@ STAGE2WINCODE = 'Stage2: Win'
 STAGE2DRAWCODE = 'Stage2: Draw'
 STAGE2LOSECODE = 'Stage2: Lose'
 FINALWINCODE = 'Final: Win'
-FINALLOSECODE = 'Final: LOSE'
+FINALLOSECODE = 'Final: Lose'
 
 # RSP서버 클래스
 class RSPServer:
