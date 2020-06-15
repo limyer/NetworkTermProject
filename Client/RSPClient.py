@@ -53,6 +53,7 @@ class RSPClient(tk.Tk):
             "connected": False,
             "cancelID": None,
             "progressbarCancelID": None,
+            "choiceMadeFlag": False,
             "count": 1,
             "timeOutCount": tk.IntVar(),
             "connectionLabel":tk.StringVar(),
@@ -336,6 +337,7 @@ class Stage1Page(tk.Frame):
         return
 
     def choice_made(self, choice):
+        self.controller.shared_data["choiceMadeFlag"] = True
         connectionManager = self.controller.shared_data["connectionManager"]
         self.informLabel.config(text="선택: " + choice.upper() + ", 상대 플레이어의 선택을 기다립니다")
         connectionManager.send_message("Stage1Input: " + choice)
@@ -377,7 +379,7 @@ class Stage1Page(tk.Frame):
     def stop_progressbar(self):
         connectionManager = self.controller.shared_data["connectionManager"]
         self.controller.shared_data["progressbarCancelID"] = self.after(50, self.stop_progressbar)
-        if self.controller.shared_data["timeOutCount"].get() == 99:
+        if self.controller.shared_data["timeOutCount"].get() == 99 and not self.controller.shared_data["choiceMadeFlag"]:
             self.progressbar.stop()
             self.cancel_progrssThread()
             self.controller.shared_data["timeOutCount"].set(0)
@@ -417,6 +419,7 @@ class Stage1Page(tk.Frame):
         self.cancel_progrssThread()
         self.cancel_thread()
         self.controller.shared_data["timeOutCount"].set(0)
+        self.controller.shared_data["choiceMadeFlag"] = False
 
 
 class Stage2Page(tk.Frame):
@@ -500,6 +503,7 @@ class Stage2Page(tk.Frame):
         self.after(1, self.stop_progressbar)
 
     def choice_made(self, choice):
+        self.controller.shared_data["choiceMadeFlag"] = True
         connectionManager = self.controller.shared_data["connectionManager"]
         if self.controller.shared_data["myTurn"]:
             self.informLabel.config(text="당신의 턴, 선택: " + choice.upper() + ", 상대 플레이어의 선택을 기다립니다")
@@ -547,7 +551,7 @@ class Stage2Page(tk.Frame):
     def stop_progressbar(self):
         connectionManager = self.controller.shared_data["connectionManager"]
         self.controller.shared_data["progressbarCancelID"] = self.after(50, self.stop_progressbar)
-        if self.controller.shared_data["timeOutCount"].get() == 99:
+        if self.controller.shared_data["timeOutCount"].get() == 99 and not self.controller.shared_data["choiceMadeFlag"]:
             self.progressbar.stop()
             self.cancel_progrssThread()
             self.controller.shared_data["timeOutCount"].set(0)
@@ -587,6 +591,7 @@ class Stage2Page(tk.Frame):
         self.cancel_progrssThread()
         self.cancel_thread()
         self.controller.shared_data["timeOutCount"].set(0)
+        self.controller.shared_data["choiceMadeFlag"] = False
 
 
 

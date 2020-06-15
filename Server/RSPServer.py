@@ -71,7 +71,7 @@ class RSPServer:
         # 소켓을 받고 쓰레드를 함수 실행
         clientThread = self.accept_socket()
         # 쓰레드가 널이 아닐 경우
-        if clientThread != "None" or clientThread != None:
+        if clientThread != "None" and clientThread != None:
             # 리스트에 쓰레드 추가
             RSPServer.threadList.append(clientThread)
             # 쓰레드 실행
@@ -98,7 +98,9 @@ class RSPServer:
             # IP 주소 리스트에 추가
             if clientThread != "None":
                 RSPServer.addressList.append(addr[0])
-            return clientThread
+                return clientThread
+            else:
+                return None
         except error:
             return "None"
 
