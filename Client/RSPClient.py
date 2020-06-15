@@ -469,7 +469,7 @@ class Stage2Page(tk.Frame):
             msg = msg.split()
             if msg[0] == STAGE2TURNCODE:
                 self.controller.shared_data["myTurn"] = True
-            elif msg[0] == STAGE2NOTTURNCODE:
+            else:
                 self.controller.shared_data["myTurn"] = False
                 
             # 서버가 게임 시작을 알림
@@ -533,15 +533,14 @@ class Stage2Page(tk.Frame):
         elif msg == FINALLOSECODE:
             self.reset()
             self.after(1, self.controller.show_frame("DefeatPage"))
-        elif msg== STAGE2TO1CODE:
-            self.reset()
-            self.after(1, self.controller.show_frame("Stage1Page"))
         elif msg != None and msg != "":
             msg = msg.split()
             if msg[0] == "Score:":
                 self.controller.shared_data["myScore"] = int(msg[1])
                 self.controller.shared_data["oppScore"] = int(msg[3])
                 self.score_update()
+                self.reset()
+                self.after(1, self.controller.show_frame("Stage1Page"))
         return
 
     def stop_progressbar(self):

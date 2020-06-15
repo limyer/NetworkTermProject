@@ -50,7 +50,6 @@ class RSPServer:
     Stage1to2Flag = False
     Stage2to1Flag = False
     restartFlag = False # 재시작 플래그
-    sendScoreFlag = False
     playerInput = ["", ""] # 서버가 받은 player 입력
     playerInputReceived = [False, False] # 플레이어의 입력을 받았는지 확인 여부
     stage1Result = ["", ""] # Stage1에서 결과
@@ -209,9 +208,22 @@ class RSPServer:
             else:
                 index = RSPServer.usernameList.index(username)
                 opponentIndex = (1 if index==0 else 0)
-
+                print("Player Input : " + str(RSPServer.playerInputReceived))
                 # 상대 클라와 내 클라 둘 다 입력을 끝냈을 때
                 if RSPServer.playerInputReceived[index] and RSPServer.playerInputReceived[opponentIndex]:
+                    # RestartFlag가 살아있을 경우
+                    if RSPServer.restartFlag:
+                        # RESTART 코드 전송
+                        self.connectionManager.send_message(clientSocket, RESTARTCODE)
+                        RSPServer.connectionCount += 1
+                        if RSPServer.connectionCount == 2:
+                            RSPServer.startStageFlag = True
+                            RSPServer.playerInputReceived = [False, False]
+                            RSPServer.currentPlayerTurn = [False, False]
+                            RSPServer.playerInput = ["", ""]
+                            RSPServer.connectionCount = 0
+                            RSPServer.restartFlag = False
+                            time.sleep(1)
                     myChoice = RSPServer.playerInput[index]
                     oppChoice = RSPServer.playerInput[opponentIndex]
 
@@ -286,7 +298,7 @@ class RSPServer:
                     time.sleep(2)
 
                 # 내 클라가 입력을 하지 않았을 때
-                elif not RSPServer.playerInputReceived[index]:
+                else:
                     # RestartFlag가 살아있을 경우
                     if RSPServer.restartFlag:
                         # RESTART 코드 전송
@@ -299,6 +311,7 @@ class RSPServer:
                             RSPServer.playerInput = ["", ""]
                             RSPServer.connectionCount = 0
                             RSPServer.restartFlag = False
+                            time.sleep(1)
                         return
 
                     # 메시지를 받음
@@ -325,25 +338,7 @@ class RSPServer:
                                 RSPServer.playerInput[index] = PAPERCODE
                             # 입력이 되었다고 저장
                             RSPServer.playerInputReceived[index] = True
-                            print("Player Input : " + str(RSPServer.playerInputReceived))      
-
-                # 상대 클라와 내 클라 둘 중에 하나가 입력을 끝냈을 때
-                elif RSPServer.playerInputReceived[index] or RSPServer.playerInputReceived[opponentIndex]:
-                    # RestartFlag가 살아있을 경우
-                    if RSPServer.restartFlag:
-                        # RESTART 코드 전송
-                        self.connectionManager.send_message(clientSocket, RESTARTCODE)
-                        RSPServer.connectionCount += 1
-                        if RSPServer.connectionCount == 2:
-                            RSPServer.startStageFlag = True
-                            RSPServer.playerInputReceived = [False, False]
-                            RSPServer.currentPlayerTurn = [False, False]
-                            RSPServer.playerInput = ["", ""]
-                            RSPServer.connectionCount = 0
-                            RSPServer.restartFlag = False
-                    return
-
-            
+                                     
         return
 
 
@@ -368,6 +363,18 @@ class RSPServer:
             else:
                 # 상대 클라와 내 클라 둘 다 입력을 끝냈을 때
                 if RSPServer.playerInputReceived[index] and RSPServer.playerInputReceived[opponentIndex]:
+                    # RestartFlag가 살아있을 경우
+                    if RSPServer.restartFlag:
+                        # RESTART 코드 전송
+                        self.connectionManager.send_message(clientSocket, RESTARTCODE)
+                        RSPServer.connectionCount += 1
+                        if RSPServer.connectionCount == 2:
+                            RSPServer.startStageFlag = True
+                            RSPServer.playerInputReceived = [False, False]
+                            RSPServer.playerInput = ["", ""]
+                            RSPServer.connectionCount = 0
+                            RSPServer.restartFlag = False
+                            time.sleep(1)
 
                     myChoice = RSPServer.playerInput[index]
                     oppChoice = RSPServer.playerInput[opponentIndex]
@@ -424,9 +431,12 @@ class RSPServer:
                         return
                     # 누군가의 승리일 때 스코어 변경
                     else:
+                        # 최종 승자 아직 없음
+                        # 스코어 전송
+                        SCORECODE = "Score: " + str(RSPServer.scoreList[index]) + " OpponentScore: " + str(RSPServer.scoreList[opponentIndex])
                         if RSPServer.Stage2to1Flag:
                             # 스테이지 1로 이동
-                            self.connectionManager.send_message(clientSocket, STAGE2TO1CODE)
+                            self.connectionManager.send_message(clientSocket, SCORECODE + " " + STAGE2TO1CODE)
                             RSPServer.connectionCount += 1
                             if RSPServer.connectionCount == 2:
                                 RSPServer.startStageFlag = True
@@ -442,15 +452,8 @@ class RSPServer:
                                 RSPServer.Stage2to1Flag = False
                             return
 
-                        # 최종 승자 아직 없음
-                        elif RSPServer.sendScoreFlag:
-                            # 스코어 전송
-                            self.connectionManager.send_message(clientSocket, "Score: " + str(RSPServer.scoreList[index]) + " OpponentScore: " + str(RSPServer.scoreList[opponentIndex]))
-                            RSPServer.connectionCount += 1
-                            if RSPServer.connectionCount == 2:
-                                RSPServer.connectionCount = 0
-                                RSPServer.sendScoreFlag = False
-                                RSPServer.Stage2to1Flag = True
+
+
                                     
                         elif not RSPServer.finalDecided:
                             if RSPServer.stage2Result[index] == "Win":
@@ -464,7 +467,7 @@ class RSPServer:
                             if RSPServer.connectionCount == 2:
                                 if RSPServer.scoreList[index] == WINNINGSCORE or RSPServer.scoreList[opponentIndex] == WINNINGSCORE:
                                     RSPServer.finalDecided = True
-                                RSPServer.sendScoreFlag = True
+                                RSPServer.Stage2to1Flag = True
                                 RSPServer.connectionCount = 0
 
                         # 최종 승자 발생시
@@ -490,13 +493,11 @@ class RSPServer:
                             self.remove_from_list(index)
                             return
 
-
-
                         # 2초 슬립
                         time.sleep(2)
 
-                # 내 클라가 둘 다 입력을 하지 않았을 때
-                elif not RSPServer.playerInputReceived[index]:
+                # 내 클라가 입력을 하지 않았을 때
+                else:
                     # RestartFlag가 살아있을 경우
                     if RSPServer.restartFlag:
                         # RESTART 코드 전송
@@ -508,6 +509,7 @@ class RSPServer:
                             RSPServer.playerInput = ["", ""]
                             RSPServer.connectionCount = 0
                             RSPServer.restartFlag = False
+                            time.sleep(1)
                         return
 
                     # 메시지를 받음
@@ -535,23 +537,7 @@ class RSPServer:
                             # 입력이 되었다고 저장
                             RSPServer.playerInputReceived[index] = True
                             print("Player Input : " + str(RSPServer.playerInputReceived))     
-                            
-                # 상대 클라와 내 클라 둘 중에 하나가 입력을 끝냈을 때
-                elif RSPServer.playerInputReceived[index] or RSPServer.playerInputReceived[opponentIndex]:
-                    # RestartFlag가 살아있을 경우
-                    if RSPServer.restartFlag:
-                        # RESTART 코드 전송
-                        self.connectionManager.send_message(clientSocket, RESTARTCODE)
-                        RSPServer.connectionCount += 1
-                        if RSPServer.connectionCount == 2:
-                            RSPServer.startStageFlag = True
-                            RSPServer.playerInputReceived = [False, False]
-                            RSPServer.playerInput = ["", ""]
-                            RSPServer.connectionCount = 0
-                            RSPServer.restartFlag = False
-                    return
 
-        
         return
 
 
