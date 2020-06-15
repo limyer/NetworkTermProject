@@ -438,7 +438,7 @@ class Stage2Page(Stage1Page):
 
         # 서버가 게임 시작을 알림
         if msg == STAGE2STARTCODE:
-            super().cancel_thread()
+            self.cancel_thread()
             self.start_stage2() 
         elif msg == STAGE2TURNCODE:
             self.controller.shared_data["myTurn"] = True
