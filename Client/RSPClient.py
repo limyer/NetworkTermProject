@@ -17,8 +17,8 @@ STAGE0TO1CODE = 'Stage 0 to 1' # (Code: "Stage 0 to 1")
 STAGE1TO2CODE = 'Stage 1 to 2' # (Code: "Stage 1 to 2")
 STAGE2TO1CODE = 'Stage 2 to 1' # (Code: "Stage 2 to 1")
 RESTARTCODE = 'Restart' # (Code: "Restart")
-STAGE1STARTCODE = 'Receiving Stage 1'
-STAGE2STARTCODE = 'Receiving Stage 2'
+STAGE1STARTCODE = 'Receiving Stage1'
+STAGE2STARTCODE = 'Receiving Stage2'
 REWRITECODE = 'Rewrite'
 CANCELCODE = 'Cancel'
 UNDECIDEDCODE = 'Undecided'
@@ -321,7 +321,10 @@ class Stage1Page(tk.Frame):
         if msg == STAGE1STARTCODE:
             self.reset()
             self.start_stage1() 
-
+        elif msg == BREAKCODE:
+            self.reset()
+            self.controller.show_frame("ErrorPage")
+            self.controller.shared_data["connected"] = False
         elif count < TIMEOUT:
             # 타임아웃 종료까지 1초에 한번 코드를 받음
             self.controller.shared_data["cancelID"] = self.after(1000, self.after_raised)

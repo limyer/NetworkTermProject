@@ -16,8 +16,8 @@ STAGE0TO1CODE = 'Stage 0 to 1' # (Code: "Stage 0 to 1")
 STAGE1TO2CODE = 'Stage 1 to 2' # (Code: "Stage 1 to 2")
 STAGE2TO1CODE = 'Stage 2 to 1' # (Code: "Stage 2 to 1")
 RESTARTCODE = 'Restart' # (Code: "Restart")
-STAGE1STARTCODE = 'Receiving Stage 1'
-STAGE2STARTCODE = 'Receiving Stage 2'
+STAGE1STARTCODE = 'Receiving Stage1'
+STAGE2STARTCODE = 'Receiving Stage2'
 REWRITECODE = 'Rewrite'
 CANCELCODE = 'Cancel'
 UNDECIDEDCODE = 'Undecided'
@@ -145,8 +145,9 @@ class RSPServer:
 
     # 쓰레드 실행 함수
     def run_client_thread(self, clientThread):
-        clientThread.daemon = True
-        clientThread.start()
+        if clientThread != "None":
+            clientThread.daemon = True
+            clientThread.start()
     
     # 쓰레드 타겟 함수
     def game_run(self, clientSocket, username):
