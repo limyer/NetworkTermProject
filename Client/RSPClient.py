@@ -310,7 +310,8 @@ class Stage1Page(tk.Frame):
 
         # 카운트 +1
         self.controller.shared_data["count"] += 1
-
+        
+        self.informLabel.config(text="가위바위보를 시작합니다.")
         connectionManager = self.controller.shared_data["connectionManager"]
         username = self.controller.shared_data["username"].get()
 
@@ -318,12 +319,12 @@ class Stage1Page(tk.Frame):
 
         # 서버가 게임 시작을 알림
         if msg == STAGE1STARTCODE:
-            self.cancel_thread()
+            self.reset()
             self.start_stage1() 
 
         elif count < TIMEOUT:
             # 타임아웃 종료까지 1초에 한번 코드를 받음
-            self.controller.shared_data["cancelID"] = self.after(100, self.after_raised)
+            self.controller.shared_data["cancelID"] = self.after(1000, self.after_raised)
         # 타임아웃
         elif count >= TIMEOUT:
             self.cancel_thread()
@@ -342,7 +343,7 @@ class Stage1Page(tk.Frame):
         connectionManager = self.controller.shared_data["connectionManager"]
         msg = connectionManager.receive_message()
         
-        self.controller.shared_data["cancelID"] = self.after(100, self.receive_code)
+        self.controller.shared_data["cancelID"] = self.after(1000, self.receive_code)
 
         if msg == STAGE1DRAWCODE:
             self.informLabel.config(text="비겼습니다. 다시 가위바위보를 시작합니다.")
@@ -427,7 +428,7 @@ class Stage2Page(tk.Frame):
         self.scoreLabel.grid(row=0, column=0, pady=10,sticky="n", rowspan=3,columnspan=3)
 
         # 안내 라벨
-        self.informLabel = tk.Label(self, text="가위 바위 보를 시작합니다")
+        self.informLabel = tk.Label(self, text="묵찌빠를 시작합니다")
         self.informLabel.grid(row=3, column=0, pady=10,sticky="n", rowspan=2,columnspan=3)
 
         # 가위바위보 버튼
@@ -454,6 +455,7 @@ class Stage2Page(tk.Frame):
 
         # 카운트 +1
         self.controller.shared_data["count"] += 1
+        self.informLabel.config(text="묵찌빠를 시작합니다.")
 
         connectionManager = self.controller.shared_data["connectionManager"]
         username = self.controller.shared_data["username"].get()
@@ -470,10 +472,11 @@ class Stage2Page(tk.Frame):
             # 서버가 게임 시작을 알림
             elif msg[1] == STAGE2STARTCODE:
                 self.reset()
-                self.start_stage2() 
+                self.start_stage2()
+
         elif count < TIMEOUT:
             # 타임아웃 종료까지 1초에 한번 코드를 받음
-            self.controller.shared_data["cancelID"] = self.after(100, self.after_raised)
+            self.controller.shared_data["cancelID"] = self.after(1000, self.after_raised)
         # 타임아웃
         elif count >= TIMEOUT:
             self.reset()
@@ -481,13 +484,11 @@ class Stage2Page(tk.Frame):
             self.controller.shared_data["connected"] = False
         return
 
-    def start_stage2(self):
-        
+    def start_stage2(self):      
         if self.controller.shared_data["myTurn"]:
             self.informLabel.config(text="당신의 턴입니다.")
         else:
             self.informLabel.config(text="상대의 턴입니다.")
-
         self.enable_buttons()
         self.score_update()
         self.controller.shared_data["timeOutCount"].set(0)
@@ -509,7 +510,7 @@ class Stage2Page(tk.Frame):
         connectionManager = self.controller.shared_data["connectionManager"]
         msg = connectionManager.receive_message()
         
-        self.controller.shared_data["cancelID"] = self.after(100, self.receive_code)
+        self.controller.shared_data["cancelID"] = self.after(1000, self.receive_code)
 
         if msg == STAGE2DRAWCODE:
             self.informLabel.config(text="비겼습니다. 다시 묵찌빠를 시작합니다.")
