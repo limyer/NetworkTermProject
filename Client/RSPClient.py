@@ -362,7 +362,8 @@ class Stage1Page(tk.Frame):
             self.controller.shared_data["myTurn"] = False
         elif msg== STAGE1TO2CODE:
             self.reset()
-            self.after(1, self.controller.show_frame("Stage2Page"))
+            self.informLabel.config(text="묵찌빠로 이동합니다.")
+            self.after(2000, self.controller.show_frame("Stage2Page"))
 
         return
 

@@ -14,7 +14,6 @@ WINNINGSCORE = 3
 BREAKCODE = 'Break' # (Code: "Break") 
 STAGE0TO1CODE = 'Stage 0 to 1' # (Code: "Stage 0 to 1")
 STAGE1TO2CODE = 'Stage 1 to 2' # (Code: "Stage 1 to 2")
-STAGE2TO1CODE = 'Stage 2 to 1' # (Code: "Stage 2 to 1")
 RESTARTCODE = 'Restart' # (Code: "Restart")
 STAGE1STARTCODE = 'ReceivingStage1'
 STAGE2STARTCODE = 'ReceivingStage2'
@@ -347,6 +346,8 @@ class RSPServer:
         opponentIndex = (1 if index==0 else 0)
         # 스테이지 2 끝내는 플래그 (True일 경우 stage2 끝)
         if not RSPServer.endStage2Flag:
+            
+            print("Player Input : " + str(RSPServer.playerInputReceived))     
             # Receiving Stage 2으로 싱크 확인 플래그
             if RSPServer.startStageFlag:
                 # 스테이지 2 시작코드 전송                
@@ -436,7 +437,7 @@ class RSPServer:
                         SCORECODE = "Score: " + str(RSPServer.scoreList[index]) + " OpponentScore: " + str(RSPServer.scoreList[opponentIndex])
                         if RSPServer.Stage2to1Flag:
                             # 스테이지 1로 이동
-                            self.connectionManager.send_message(clientSocket, SCORECODE + " " + STAGE2TO1CODE)
+                            self.connectionManager.send_message(clientSocket, SCORECODE)
                             RSPServer.connectionCount += 1
                             if RSPServer.connectionCount == 2:
                                 RSPServer.startStageFlag = True
@@ -536,7 +537,6 @@ class RSPServer:
                                 RSPServer.playerInput[index] = PAPERCODE
                             # 입력이 되었다고 저장
                             RSPServer.playerInputReceived[index] = True
-                            print("Player Input : " + str(RSPServer.playerInputReceived))     
 
         return
 
