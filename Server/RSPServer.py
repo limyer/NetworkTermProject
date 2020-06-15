@@ -190,7 +190,7 @@ class RSPServer:
                     RSPServer.startStageFlag = True
                     RSPServer.connectionCount = 0
             if self.connectionManager.receive_message(clientSocket) == CANCELCODE:
-                if username in RSPServer.usernameList
+                if username in RSPServer.usernameList:
                     index = RSPServer.usernameList.index(username)
                     self.remove_from_list(index)
         return
@@ -208,8 +208,11 @@ class RSPServer:
                     RSPServer.startStageFlag = False
                     RSPServer.connectionCount = 0
 
-            else:
-                index = RSPServer.usernameList.index(username)
+            else:                
+                if username in RSPServer.usernameList:
+                    index = RSPServer.usernameList.index(username)
+                else:
+                    return
                 opponentIndex = (1 if index==0 else 0)
                 print(str(index) + "Player Input : " + str(RSPServer.playerInputReceived))
                 # 상대 클라와 내 클라 둘 다 입력을 끝냈을 때
@@ -325,6 +328,7 @@ class RSPServer:
                         return 
                     else:
                         # 공백 기준으로 자름
+                        print("msg = " + msg)
                         msg = msg.split()
                         
                         # 잘라서 두개의 요소가 나오고 내 입력이 비어있을 경우
@@ -346,6 +350,10 @@ class RSPServer:
 
 
     def stage2(self, clientSocket, username):
+        if username in RSPServer.usernameList:
+            index = RSPServer.usernameList.index(username)
+        else:
+            return
         index = RSPServer.usernameList.index(username)
         opponentIndex = (1 if index==0 else 0)
         # 스테이지 2 끝내는 플래그 (True일 경우 stage2 끝)
