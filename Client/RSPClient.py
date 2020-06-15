@@ -11,13 +11,30 @@ import tkinter.ttk
 
 HOST = '127.0.0.1'
 PORT = 12000
+USERNAMECODE = "Username: "
 BREAKCODE = 'Break' # (Code: "Break") 
 STAGE0TO1CODE = 'Stage 0 to 1' # (Code: "Stage 0 to 1")
-USERNAMECODE = 'Username: ' # (Code: "Username: " + username)
-REWRITECODE = 'Rewrite'
-STAGE1STARTCODE = 'Receiving Stage 1'
-CANCELCODE = 'Cancel'
+STAGE1TO2CODE = 'Stage 1 to 2' # (Code: "Stage 1 to 2")
+STAGE2TO1CODE = 'Stage 2 to 1' # (Code: "Stage 2 to 1")
 RESTARTCODE = 'Restart' # (Code: "Restart")
+STAGE1STARTCODE = 'Receiving Stage 1'
+STAGE2STARTCODE = 'Receiving Stage 2'
+REWRITECODE = 'Rewrite'
+CANCELCODE = 'Cancel'
+UNDECIDEDCODE = 'Undecided'
+ROCKCODE = 'ROCK'
+SCISSORSCODE = 'SCISSORS'
+PAPERCODE = 'PAPER'
+STAGE1WINCODE = 'Stage1: Win'
+STAGE1DRAWCODE = 'Stage1: Draw'
+STAGE1LOSECODE = 'Stage1: Lose'
+STAGE2TURNCODE = 'Turn'
+STAGE2NOTTURNCODE = 'Not Turn'
+STAGE2WINCODE = 'Stage2: Win'
+STAGE2DRAWCODE = 'Stage2: Draw'
+STAGE2LOSECODE = 'Stage2: Lose'
+FINALWINCODE = 'Final: Win'
+FINALLOSECODE = 'Final: LOSE'
 TIMEOUT = 70
 
 # RSP 클라이언트
@@ -43,6 +60,7 @@ class RSPClient(tk.Tk):
             "score":tk.StringVar(),
             "myScore":0,
             "oppScore":0,
+            "myTurn": False,
         }
 
         self.title_font = tkfont.Font(family='Helvetica', size=18, weight="bold", slant="italic")
@@ -57,7 +75,7 @@ class RSPClient(tk.Tk):
 
         self.frames = {}
         # 페이지 목록
-        for F in (StartPage, ConnectionPage, ErrorPage, GamePage, PageTwo):
+        for F in (StartPage, ConnectionPage, ErrorPage, Stage1Page, Stage2Page, VictoryPage, DefeatPage, PageTwo):
             page_name = F.__name__
             frame = F(parent=container, controller=self)
             self.frames[page_name] = frame
@@ -187,14 +205,13 @@ class ConnectionPage(tk.Frame):
 
         # 실제로 메시지 수신
         msg = connectionManager.receive_message()
- 
 
         # 서버가 두 명이 접속하여 성공했음을 알림
         if msg == STAGE0TO1CODE:
             self.cancel_thread()
             self.controller.shared_data["connectionLabel"].set("게임 시작 중...")
             # 3초 후에 게임 페이지로 이동
-            self.after(3000, self.controller.show_frame("GamePage"))
+            self.after(3000, self.controller.show_frame("Stage1Page"))
         # 클라이언트가 두 명 이상이기 때문에 서버가 거부 
         elif msg == BREAKCODE:
             self.cancel_thread()
@@ -253,17 +270,17 @@ class ErrorPage(tk.Frame):
         return
 
 
-# 실제 게임 실행 페이지
+# Stage 1 게임 실행 페이지
 # 그리드 레이아웃으로 구성
-class GamePage(tk.Frame):
+class Stage1Page(tk.Frame):
     def __init__(self, parent, controller):
         tk.Frame.__init__(self, parent)
         self.controller = controller
         score = self.controller.shared_data["score"]
 
         # 스코어 라벨
-        scoreLabel = tk.Label(self, textvariable=score, font=controller.title_font, width=30)
-        scoreLabel.grid(row=0, column=0, pady=10,sticky="n", rowspan=3,columnspan=3)
+        self.scoreLabel = tk.Label(self, textvariable=score, font=controller.title_font, width=30)
+        self.scoreLabel.grid(row=0, column=0, pady=10,sticky="n", rowspan=3,columnspan=3)
 
         # 안내 라벨
         self.informLabel = tk.Label(self, text="가위 바위 보를 시작합니다")
@@ -326,7 +343,7 @@ class GamePage(tk.Frame):
         
         self.controller.shared_data["cancelID"] = self.after(100, self.receive_code)
 
-        if msg == "Stage1: Draw":
+        if msg == STAGE1DRAWCODE:
             self.informLabel.config(text="비겼습니다. 다시 가위바위보를 시작합니다.")
             self.reset()
             self.after(2000, self.after_raised)
@@ -334,14 +351,14 @@ class GamePage(tk.Frame):
             self.informLabel.config(text="다시 가위바위보를 시작합니다.")
             self.reset()
             self.after(2000, self.after_raised)
-        elif msg== "Stage1: Win":
-            self.informLabel.config(text="묵찌빠를 시작합니다. 당신의 턴입니다.")
+        elif msg== STAGE1WINCODE:
+            self.controller.shared_data["myTurn"] = True
+        elif msg== STAGE1LOSECODE:
+            self.controller.shared_data["myTurn"] = False
+        elif msg== STAGE1TO2CODE:
             self.reset()
-            self.after(2000, self.after_raised)
-        elif msg== "Stage1: Lose":
-            self.informLabel.config(text="묵찌빠를 시작합니다. 상대의 턴입니다.")
-            self.reset()
-            self.after(2000, self.after_raised)
+            self.after(2000, lambda: self.controller.show_frame("Stage2Page"))
+
         return
 
     def start_stage1(self):
@@ -378,7 +395,6 @@ class GamePage(tk.Frame):
         self.rockButton.config(state="disabled")
         self.scissorsButton.config(state="disabled")
         self.paperButton.config(state="disabled")
-    
 
     def cancel_progrssThread(self):
         if self.controller.shared_data["progressbarCancelID"] != None:
@@ -397,6 +413,125 @@ class GamePage(tk.Frame):
         self.controller.shared_data["timeOutCount"].set(0)
 
 
+class Stage2Page(Stage1Page):
+
+    def __init__(self, parent, controller):
+        super().__init__(parent, controller)
+        self.controller = controller
+        self.informLabel.config(text="묵찌빠를 시작합니다.")
+
+    def afterRaised(self):
+        if self.controller.shared_data["myTurn"]:
+            self.informLabel.config(text="당신의 턴입니다.")
+        else:
+            self.informLabel.config(text="상대의 턴입니다.")
+        
+        count = self.controller.shared_data["count"]
+
+        # 카운트 +1
+        self.controller.shared_data["count"] += 1
+
+        connectionManager = self.controller.shared_data["connectionManager"]
+        username = self.controller.shared_data["username"].get()
+
+        msg = connectionManager.receive_message()
+
+        # 서버가 게임 시작을 알림
+        if msg == STAGE2STARTCODE:
+            super().cancel_thread()
+            self.start_stage2() 
+        elif msg == STAGE2TURNCODE:
+            self.controller.shared_data["myTurn"] = True
+        elif msg == STAGE2NOTTURNCODE:
+            self.controller.shared_data["myTurn"] = False
+        elif count < TIMEOUT:
+            # 타임아웃 종료까지 1초에 한번 코드를 받음
+            self.controller.shared_data["cancelID"] = self.after(100, self.after_raised)
+        # 타임아웃
+        elif count >= TIMEOUT:
+            super().cancel_thread()
+            self.controller.show_frame("ErrorPage")
+            self.controller.shared_data["connected"] = False
+        return
+
+    def start_stage2(self):
+        super().enable_buttons()
+        super().score_update()
+        self.controller.shared_data["timeOutCount"].set(0)
+        self.progressbar.start(100)
+        self.after(1, super().stop_progressbar)
+
+    def choice_made(self, choice):
+        connectionManager = self.controller.shared_data["connectionManager"]
+        self.informLabel.config(text="선택: " + choice.upper() + ", 상대 플레이어의 선택을 기다립니다")
+        connectionManager.send_message("Stage2Input: " + choice)
+        super().disable_buttons()
+        self.after(1, self.receive_code)
+
+    def receive_code(self):
+        connectionManager = self.controller.shared_data["connectionManager"]
+        msg = connectionManager.receive_message()
+        
+        self.controller.shared_data["cancelID"] = self.after(100, self.receive_code)
+
+        if msg == STAGE2DRAWCODE:
+            self.informLabel.config(text="비겼습니다. 다시 묵찌빠를 시작합니다.")
+            super().reset()
+            self.after(2000, self.after_raised)
+        elif msg == RESTARTCODE:
+            self.informLabel.config(text="다시 묵찌빠를 시작합니다.")
+            super().reset()
+            self.after(2000, self.after_raised)
+        elif msg== STAGE2WINCODE:
+            self.informLabel.config(text="당신의 승리입니다!")
+        elif msg== STAGE2LOSECODE:
+            self.informLabel.config(text="당신의 패배입니다...")
+        elif msg == FINALWINCODE:
+            super().reset()
+            self.after(2000, lambda: self.controller.show_frame("VictoryPage"))
+        elif msg == FINALLOSECODE:
+            super().reset()
+            self.after(2000, lambda: self.controller.show_frame("DefeatPage"))
+        elif msg== STAGE2TO1CODE:
+            super().reset()
+            self.after(2000, lambda: self.controller.show_frame("Stage1Page"))
+        elif msg != None or msg != "":
+            msg = msg.split()
+            if msg[0] == "Score:":
+                self.controller.shared_data["myScore"] = int(msg[1])
+                self.controller.shared_data["oppScore"] = int(msg[3])
+                super().score_update()
+        return
+
+
+class VictoryPage(tk.Frame):
+
+    def __init__(self, parent, controller):
+        tk.Frame.__init__(self, parent)
+        self.controller = controller
+        label = tk.Label(self, text="최종 승리!", font=controller.title_font)
+        label.pack(side="top", fill="x", pady=10)
+        button = tk.Button(self, text="시작 페이지로",
+                           command=lambda: controller.show_frame("StartPage"))
+        button.pack()
+    
+    def afterRaised(self):
+        return
+
+
+class DefeatPage(tk.Frame):
+
+    def __init__(self, parent, controller):
+        tk.Frame.__init__(self, parent)
+        self.controller = controller
+        label = tk.Label(self, text="최종 패배..", font=controller.title_font)
+        label.pack(side="top", fill="x", pady=10)
+        button = tk.Button(self, text="시작 페이지로",
+                           command=lambda: controller.show_frame("StartPage"))
+        button.pack()
+    
+    def afterRaised(self):
+        return
 
 
 class PageTwo(tk.Frame):

@@ -2,11 +2,6 @@ from socket import *
 from RSPServer import *
 
 
-BREAKCODE = 'Break' # (Code: "Break") 
-STAGE0TO1CODE = 'Stage 0 to 1' # (Code: "Stage 0 to 1")
-RESTARTCODE = 'Restart' # (Code: "Restart")
-REWRITECODE = 'Rewrite'
-
 # 서버 연결 매니저 (Server Side)
 class ServerConnectionManager:
     # 생성자 매개변수: HOST IP와 PORT 번호
