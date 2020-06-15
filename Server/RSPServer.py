@@ -431,7 +431,7 @@ class RSPServer:
                                 RSPServer.connectionCount = 0
                                 RSPServer.restartFlag = False
                                 print("Stage 2 end")
-                                RSPServer.endStage0Flag = False
+                                RSPServer.endStage1Flag = False
                                 RSPServer.stage = 1
                                 RSPServer.endStage2Flag = True
                                 RSPServer.Stage2to1Flag = False
