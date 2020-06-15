@@ -438,7 +438,7 @@ class Stage2Page(Stage1Page):
 
         # 서버가 게임 시작을 알림
         if msg == STAGE2STARTCODE:
-            self.cancel_thread()
+            self.reset()
             self.start_stage2() 
         elif msg == STAGE2TURNCODE:
             self.controller.shared_data["myTurn"] = True
@@ -449,7 +449,7 @@ class Stage2Page(Stage1Page):
             self.controller.shared_data["cancelID"] = self.after(100, self.after_raised)
         # 타임아웃
         elif count >= TIMEOUT:
-            self.cancel_thread()
+            self.reset()
             self.controller.show_frame("ErrorPage")
             self.controller.shared_data["connected"] = False
         return

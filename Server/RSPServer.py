@@ -432,7 +432,7 @@ class RSPServer:
                             RSPServer.restartFlag = False
                             print("Stage 2 end")
                             RSPServer.endStage0Flag = False
-                            RSPServer.stage = 0
+                            RSPServer.stage = 1
                             RSPServer.endStage2Flag = True
                             RSPServer.startStageFlag = True
                             RSPServer.turnInformFlag = True
@@ -446,7 +446,6 @@ class RSPServer:
                                 self.connectionManager.send_message(clientSocket, FINALLOSECODE)
                             RSPServer.connectionCount += 1
                             if RSPServer.connectionCount == 2:
-                                RSPServer.scoreList[index] += 1
                                 RSPServer.startStageFlag = True
                                 RSPServer.playerInputReceived = [False, False]
                                 RSPServer.playerInput = ["", ""]
@@ -476,9 +475,9 @@ class RSPServer:
                                 RSPServer.playerInput = ["", ""]
                                 RSPServer.connectionCount = 0
                                 RSPServer.restartFlag = False
-                                print("Stage 2 end, Connection over")
+                                print("Stage 2 end")
                                 RSPServer.endStage0Flag = False
-                                RSPServer.stage = 0
+                                RSPServer.stage = 1
                                 RSPServer.endStage2Flag = True
                                 RSPServer.startStageFlag = True
                     # 2초 슬립
