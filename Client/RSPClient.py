@@ -346,18 +346,18 @@ class Stage1Page(tk.Frame):
         if msg == STAGE1DRAWCODE:
             self.informLabel.config(text="비겼습니다. 다시 가위바위보를 시작합니다.")
             self.reset()
-            self.after(2000, self.after_raised)
+            self.after(1000, self.after_raised)
         elif msg == RESTARTCODE:
             self.informLabel.config(text="다시 가위바위보를 시작합니다.")
             self.reset()
-            self.after(2000, self.after_raised)
+            self.after(1000, self.after_raised)
         elif msg== STAGE1WINCODE:
             self.controller.shared_data["myTurn"] = True
         elif msg== STAGE1LOSECODE:
             self.controller.shared_data["myTurn"] = False
         elif msg== STAGE1TO2CODE:
             self.reset()
-            self.after(2000, lambda: self.controller.show_frame("Stage2Page"))
+            self.after(1000, lambda: self.controller.show_frame("Stage2Page"))
 
         return
 
@@ -477,24 +477,24 @@ class Stage2Page(Stage1Page):
         if msg == STAGE2DRAWCODE:
             self.informLabel.config(text="비겼습니다. 다시 묵찌빠를 시작합니다.")
             self.reset()
-            self.after(2000, self.after_raised)
+            self.after(1000, self.after_raised)
         elif msg == RESTARTCODE:
             self.informLabel.config(text="다시 묵찌빠를 시작합니다.")
             self.reset()
-            self.after(2000, self.after_raised)
+            self.after(1000, self.after_raised)
         elif msg== STAGE2WINCODE:
             self.informLabel.config(text="당신의 승리입니다!")
         elif msg== STAGE2LOSECODE:
             self.informLabel.config(text="당신의 패배입니다...")
         elif msg == FINALWINCODE:
             self.reset()
-            self.after(2000, lambda: self.controller.show_frame("VictoryPage"))
+            self.after(1000, lambda: self.controller.show_frame("VictoryPage"))
         elif msg == FINALLOSECODE:
             self.reset()
-            self.after(2000, lambda: self.controller.show_frame("DefeatPage"))
+            self.after(1000, lambda: self.controller.show_frame("DefeatPage"))
         elif msg== STAGE2TO1CODE:
             self.reset()
-            self.after(2000, lambda: self.controller.show_frame("Stage1Page"))
+            self.after(1000, lambda: self.controller.show_frame("Stage1Page"))
         elif msg != None and msg != "":
             msg = msg.split()
             if msg[0] == "Score:":
