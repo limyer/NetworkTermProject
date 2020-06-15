@@ -85,14 +85,14 @@ class RSPServer:
             # 타임아웃 내로 응답 없을시 소켓 닫힘
             clientSocket.settimeout(TIMEOUT)
             print('Connected by:', addr[0], ':', addr[1])
-            index = RSPServer.addressList.index(addr[0])
             # IP 주소가 이미 리스트에 존재할 경우
             if addr[0] in RSPServer.addressList:
                 print("Reconnection Occured, Restarting Thread")
                 # 리스트에서 삭제 후 연결
+                index = RSPServer.addressList.index(addr[0])
                 self.remove_from_list(index)
             # 실제로 쓰레드를 만드는 작업 시작
-            clientThread = self.make_client_thread(clientSocket, index)
+            clientThread = self.make_client_thread(clientSocket)
             # IP 주소 리스트에 추가
             if clientThread != "None":
                 RSPServer.addressList.append(addr[0])
@@ -101,7 +101,7 @@ class RSPServer:
             return "None"
 
     # 실제로 쓰레드가 만들어지는 함수
-    def make_client_thread(self, clientSocket, index):
+    def make_client_thread(self, clientSocket):
         # 쓰레드 리스트가 2개 이상 요소를 가질 경우
         if len(RSPServer.threadList) >= 2:
             # 유저이름을 먼저 받고
@@ -252,8 +252,6 @@ class RSPServer:
                         elif RSPServer.stage1Result[index] == "Lose":
                             self.connectionManager.send_message(clientSocket, STAGE1LOSECODE)
                             RSPServer.currentPlayerTurn[index] = False
-                        time.sleep(3)
-                        self.connectionManager.send_message(clientSocket, STAGE1TO2CODE)
                         # 스테이지 2로 넘어가는 동작
                         if RSPServer.connectionCount == 2:
                             RSPServer.startStageFlag = True
@@ -266,6 +264,9 @@ class RSPServer:
                             RSPServer.stage = 2
                             RSPServer.endStage2Flag = False
                             RSPServer.startStageFlag = True
+                        time.sleep(3)
+                        self.connectionManager.send_message(clientSocket, STAGE1TO2CODE)
+
 
                     
                     # 2초 슬립

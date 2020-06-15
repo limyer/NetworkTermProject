@@ -495,7 +495,7 @@ class Stage2Page(Stage1Page):
         elif msg== STAGE2TO1CODE:
             super().reset()
             self.after(2000, lambda: self.controller.show_frame("Stage1Page"))
-        elif msg != None or msg != "":
+        elif msg != None and msg != "":
             msg = msg.split()
             if msg[0] == "Score:":
                 self.controller.shared_data["myScore"] = int(msg[1])
