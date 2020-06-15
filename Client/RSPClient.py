@@ -341,6 +341,8 @@ class Stage1Page(tk.Frame):
         connectionManager = self.controller.shared_data["connectionManager"]
         self.informLabel.config(text="선택: " + choice.upper() + ", 상대 플레이어의 선택을 기다립니다")
         connectionManager.send_message("Stage1Input: " + choice)
+        connectionManager.send_message("Stage1Input: " + choice)
+        connectionManager.send_message("Stage1Input: " + choice)
         self.disable_buttons()
         self.after(1, self.receive_code)
 
@@ -511,6 +513,8 @@ class Stage2Page(tk.Frame):
             self.informLabel.config(text="상대의 턴, 선택: " + choice.upper() + ", 상대 플레이어의 선택을 기다립니다")
         self.informLabel.config(text="선택: " + choice.upper() + ", 상대 플레이어의 선택을 기다립니다")
         connectionManager.send_message("Stage2Input: " + choice)
+        connectionManager.send_message("Stage2Input: " + choice)
+        connectionManager.send_message("Stage2Input: " + choice)
         self.disable_buttons()
         self.after(1, self.receive_code)
 
@@ -606,8 +610,10 @@ class VictoryPage(tk.Frame):
                            command=lambda: controller.show_frame("StartPage"))
         button.pack()
     
-    def afterRaised(self):
+    def after_raised(self):
         return
+    
+    # 초기화
 
 
 class DefeatPage(tk.Frame):
@@ -621,8 +627,10 @@ class DefeatPage(tk.Frame):
                            command=lambda: controller.show_frame("StartPage"))
         button.pack()
     
-    def afterRaised(self):
+    def after_raised(self):
         return
+
+    # 정보 초기화
 
 
 class PageTwo(tk.Frame):
@@ -636,7 +644,7 @@ class PageTwo(tk.Frame):
                            command=lambda: controller.show_frame("StartPage"))
         button.pack()
     
-    def afterRaised(self):
+    def after_raised(self):
         return
 
 

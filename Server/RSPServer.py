@@ -156,7 +156,7 @@ class RSPServer:
             RSPServer.stage = 0
             # 유저이름이 삭제되면 쓰레드 종료
             while username in RSPServer.usernameList:
-                time.sleep(0.5)
+                time.sleep(1)
                 if RSPServer.stage == 0:
                     self.stage0Thread = threading.Thread(target=self.stage0, args=(clientSocket, username))
                     self.stage0Thread.setDaemon(True)
@@ -299,7 +299,7 @@ class RSPServer:
                     time.sleep(2)
 
                 # 내 클라가 입력을 하지 않았을 때
-                else:
+                elif not RSPServer.playerInputReceived[index]:
                     # RestartFlag가 살아있을 경우
                     if RSPServer.restartFlag:
                         # RESTART 코드 전송
@@ -320,26 +320,26 @@ class RSPServer:
                     
                     # 받은 메시지가 비어있으면 리턴
                     if msg == None or "":
-                        return    
-
-                    # 공백 기준으로 자름
-                    msg = msg.split()
-                    
-                    # 잘라서 두개의 요소가 나오고 내 입력이 비어있을 경우
-                    if len(msg) == 2 and not RSPServer.playerInputReceived[index]:
-                        # Undecided 코드가 오면 Restart 플래그를 세움
-                        if msg[1] == UNDECIDEDCODE:
-                            RSPServer.restartFlag = True
-                        else:
-                            if msg[1] == ROCKCODE:
-                                RSPServer.playerInput[index] = ROCKCODE
-                            elif msg[1] == SCISSORSCODE:
-                                RSPServer.playerInput[index] = SCISSORSCODE
-                            elif msg[1] == PAPERCODE:
-                                RSPServer.playerInput[index] = PAPERCODE
-                            # 입력이 되었다고 저장
-                            RSPServer.playerInputReceived[index] = True
-                                     
+                        return 
+                    else:
+                        # 공백 기준으로 자름
+                        msg = msg.split()
+                        
+                        # 잘라서 두개의 요소가 나오고 내 입력이 비어있을 경우
+                        if len(msg) == 2:
+                            # Undecided 코드가 오면 Restart 플래그를 세움
+                            if msg[1] == UNDECIDEDCODE:
+                                RSPServer.restartFlag = True
+                            else:
+                                if msg[1] == ROCKCODE:
+                                    RSPServer.playerInput[index] = ROCKCODE
+                                elif msg[1] == SCISSORSCODE:
+                                    RSPServer.playerInput[index] = SCISSORSCODE
+                                elif msg[1] == PAPERCODE:
+                                    RSPServer.playerInput[index] = PAPERCODE
+                                # 입력이 되었다고 저장
+                                RSPServer.playerInputReceived[index] = True
+                                        
         return
 
 
@@ -449,7 +449,6 @@ class RSPServer:
                                 RSPServer.restartFlag = False
                                 print("Stage 2 end")
                                 RSPServer.endStage1Flag = False
-                                time.sleep(2)
                                 RSPServer.stage = 1
                                 RSPServer.endStage2Flag = True
                                 RSPServer.Stage2to1Flag = False
@@ -470,7 +469,8 @@ class RSPServer:
                             if RSPServer.connectionCount == 2:
                                 if RSPServer.scoreList[index] == WINNINGSCORE or RSPServer.scoreList[opponentIndex] == WINNINGSCORE:
                                     RSPServer.finalDecided = True
-                                RSPServer.Stage2to1Flag = True
+                                else:
+                                    RSPServer.Stage2to1Flag = True
                                 RSPServer.connectionCount = 0
 
                         # 최종 승자 발생시
@@ -492,15 +492,17 @@ class RSPServer:
                                 RSPServer.stage = 0
                                 RSPServer.endStage2Flag = True
                                 RSPServer.finalDecided = False
-                            # 쓰레드 연결 해제, 스테이지 0으로 이동
-                            self.remove_from_list(index)
+                                # 쓰레드 연결 해제, 스테이지 0으로 이동
+                                RSPServer.usernameList.clear()
+                                RSPServer.addressList.clear()
+                                RSPServer.threadList.clear()
                             return
 
                         # 2초 슬립
                         time.sleep(2)
 
                 # 내 클라가 입력을 하지 않았을 때
-                else:
+                elif not RSPServer.playerInputReceived[index]:
                     # RestartFlag가 살아있을 경우
                     if RSPServer.restartFlag:
                         # RESTART 코드 전송
@@ -520,32 +522,32 @@ class RSPServer:
                     
                     # 받은 메시지가 비어있으면 리턴
                     if msg == None or "":
-                        return    
-
-                    # 공백 기준으로 자름
-                    msg = msg.split()
-                    
-                    # 잘라서 두개의 요소가 나오고 내 입력이 비어있을 경우
-                    if len(msg) == 2:
-                        # Undecided 코드가 오면 Restart 플래그를 세움
-                        if msg[1] == UNDECIDEDCODE:
-                            RSPServer.restartFlag = True
-                        else:
-                            if msg[1] == ROCKCODE:
-                                RSPServer.playerInput[index] = ROCKCODE
-                            elif msg[1] == SCISSORSCODE:
-                                RSPServer.playerInput[index] = SCISSORSCODE
-                            elif msg[1] == PAPERCODE:
-                                RSPServer.playerInput[index] = PAPERCODE
-                            # 입력이 되었다고 저장
-                            RSPServer.playerInputReceived[index] = True
+                        return
+                    else:
+                        # 공백 기준으로 자름
+                        msg = msg.split()
+                        
+                        # 잘라서 두개의 요소가 나오고 내 입력이 비어있을 경우
+                        if len(msg) == 2:
+                            # Undecided 코드가 오면 Restart 플래그를 세움
+                            if msg[1] == UNDECIDEDCODE:
+                                RSPServer.restartFlag = True
+                            else:
+                                if msg[1] == ROCKCODE:
+                                    RSPServer.playerInput[index] = ROCKCODE
+                                elif msg[1] == SCISSORSCODE:
+                                    RSPServer.playerInput[index] = SCISSORSCODE
+                                elif msg[1] == PAPERCODE:
+                                    RSPServer.playerInput[index] = PAPERCODE
+                                # 입력이 되었다고 저장
+                                RSPServer.playerInputReceived[index] = True
 
         return
 
 
 
 
-    def remove_from_list(self,index):
+    def remove_from_list(self, index):
         RSPServer.usernameList.remove(RSPServer.usernameList[index])
         RSPServer.addressList.remove(RSPServer.addressList[index])
         RSPServer.threadList.remove(RSPServer.threadList[index])
