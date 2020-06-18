@@ -1,0 +1,365 @@
+Python 3.8.2 (tags/v3.8.2:7b3ab59, Feb 25 2020, 22:45:29) [MSC v.1916 32 bit (Intel)] on win32
+Type "help", "copyright", "credits" or "license()" for more information.
+>>> 
+================== RESTART: C:\Users\user\Desktop\RSPServer.py =================
+The server is ready to receive
+waiting to be connected
+
+Connected by: 172.30.1.254 : 58694
+Received: <Username: choi>
+Thread start
+[<Thread(Thread-1, started daemon 6296)>]
+
+['choi']
+waiting to be connected
+
+Connected by: 223.38.22.192 : 59148
+Received: <Username: NAM>
+[<Thread(Thread-1, started daemon 6296)>, <Thread(Thread-15, started daemon 292)>]Thread start
+
+
+['choi', 'NAM']
+waiting to be connected
+
+Message Sent: <Stage 0 to 1>
+Stage 0 end
+Message Sent: <Stage 0 to 1>
+Stage 0 end
+Message Sent: <ReceivingStage1>
+Message Sent: <ReceivingStage1>
+1Player Input : [False, False]
+0Player Input : [False, False]
+Received: <Stage1Input: SCISSORS>
+msg = Stage1Input: SCISSORS
+1Player Input : [True, False]
+0Player Input : [True, False]
+1Player Input : [True, False]
+0Player Input : [True, False]
+1Player Input : [True, False]
+0Player Input : [True, False]
+1Player Input : [True, False]
+0Player Input : [True, False]
+1Player Input : [True, False]
+0Player Input : [True, False]
+1Player Input : [True, False]
+Received: <Stage1Input: ROCK>
+msg = Stage1Input: ROCK
+0Player Input : [True, True]
+choi Lose
+Message Sent: <Stage1: Lose>
+1Player Input : [True, True]
+NAM Win
+Message Sent: <Stage1: Win>
+0Player Input : [True, True]
+choi Lose
+Message Sent: <Stage 1 to 2>
+1Player Input : [True, True]
+NAM Win
+Message Sent: <Stage 1 to 2>
+Stage 1 end
+0Player Input : [False, False]
+Message Sent: <NotTurn ReceivingStage2>
+1Player Input : [False, False]
+Message Sent: <Turn ReceivingStage2>
+0Player Input : [False, False]
+1Player Input : [False, False]
+Received: <Stage2Input: ROCK>
+0Player Input : [True, False]
+1Player Input : [True, False]
+Received: <Stage2Input: SCISSORS>0Player Input : [True, False]
+
+choi Draw
+Message Sent: <Stage2: Draw>
+1Player Input : [True, True]
+NAM Draw
+Message Sent: <Stage2: Draw>
+0Player Input : [False, False]
+Message Sent: <Turn ReceivingStage2>
+1Player Input : [False, False]
+Message Sent: <NotTurn ReceivingStage2>
+0Player Input : [False, False]
+1Player Input : [False, False]
+Received: <Stage2Input: SCISSORS>
+0Player Input : [True, False]
+1Player Input : [True, False]
+0Player Input : [True, False]
+1Player Input : [True, False]
+0Player Input : [True, False]
+1Player Input : [True, False]
+0Player Input : [True, False]
+Received: <Stage2Input: PAPER>
+1Player Input : [True, True]
+NAM Draw
+Message Sent: <Stage2: Draw>
+0Player Input : [True, True]
+choi Draw
+Message Sent: <Stage2: Draw>
+1Player Input : [False, False]
+Message Sent: <NotTurn ReceivingStage2>
+0Player Input : [False, False]
+Message Sent: <Turn ReceivingStage2>
+1Player Input : [False, False]
+0Player Input : [False, False]
+Received: <Stage2Input: PAPER>
+1Player Input : [True, False]
+0Player Input : [True, False]
+1Player Input : [True, False]
+0Player Input : [True, False]
+1Player Input : [True, False]
+0Player Input : [True, False]
+Received: <Stage2Input: SCISSORS>
+1Player Input : [True, True]
+NAM Draw
+Message Sent: <Stage2: Draw>
+0Player Input : [True, True]
+choi Draw
+Message Sent: <Stage2: Draw>
+1Player Input : [False, False]
+Message Sent: <Turn ReceivingStage2>
+0Player Input : [False, False]
+Message Sent: <NotTurn ReceivingStage2>
+1Player Input : [False, False]
+0Player Input : [False, False]
+Received: <Stage2Input: PAPER>
+1Player Input : [True, False]
+0Player Input : [True, False]
+1Player Input : [True, False]
+Received: <Stage2Input: ROCK>
+0Player Input : [True, True]
+choi Draw
+Message Sent: <Stage2: Draw>
+1Player Input : [True, True]
+NAM Draw
+Message Sent: <Stage2: Draw>
+0Player Input : [False, False]
+Message Sent: <Turn ReceivingStage2>
+1Player Input : [False, False]
+Message Sent: <NotTurn ReceivingStage2>
+0Player Input : [False, False]
+1Player Input : [False, False]
+0Player Input : [False, False]
+Received: <Stage2Input: PAPER>
+1Player Input : [True, False]
+0Player Input : [True, False]
+1Player Input : [True, False]
+0Player Input : [True, False]
+1Player Input : [True, False]
+0Player Input : [True, False]
+Received: <Stage2Input: PAPER>
+1Player Input : [True, True]
+NAM Lose
+Message Sent: <Stage2: Lose>
+0Player Input : [True, True]
+choi Win
+Message Sent: <Stage2: Win>
+1Player Input : [True, True]
+NAM Lose
+Message Sent: <Score: 0 OpponentScore: 1>
+0Player Input : [True, True]
+choi Win
+Message Sent: <Score: 1 OpponentScore: 0>
+Stage 2 end
+Message Sent: <ReceivingStage1>
+Message Sent: <ReceivingStage1>
+1Player Input : [False, False]
+0Player Input : [False, False]
+1Player Input : [False, False]
+0Player Input : [False, False]
+1Player Input : [False, False]
+Received: <Stage1Input: SCISSORS>
+msg = Stage1Input: SCISSORS
+0Player Input : [True, False]
+1Player Input : [True, False]
+0Player Input : [True, False]
+Received: <Stage1Input: ROCK>
+msg = Stage1Input: ROCK
+1Player Input : [True, True]
+NAM Win
+Message Sent: <Stage1: Win>
+0Player Input : [True, True]
+choi Lose
+Message Sent: <Stage1: Lose>
+1Player Input : [True, True]
+NAM Win
+Message Sent: <Stage 1 to 2>
+0Player Input : [True, True]
+choi Lose
+Message Sent: <Stage 1 to 2>
+Stage 1 end
+1Player Input : [False, False]
+Message Sent: <Turn ReceivingStage2>
+0Player Input : [False, False]
+Message Sent: <NotTurn ReceivingStage2>
+1Player Input : [False, False]
+0Player Input : [False, False]
+Received: <Stage2Input: ROCK>
+1Player Input : [True, False]
+0Player Input : [True, False]
+1Player Input : [True, False]
+Received: <Stage2Input: ROCK>
+0Player Input : [True, True]
+choi Lose
+Message Sent: <Stage2: Lose>
+1Player Input : [True, True]
+NAM Win
+Message Sent: <Stage2: Win>
+0Player Input : [True, True]
+choi Lose
+Message Sent: <Score: 1 OpponentScore: 1>
+1Player Input : [True, True]
+NAM Win
+Message Sent: <Score: 1 OpponentScore: 1>
+Stage 2 end
+Message Sent: <ReceivingStage1>
+Message Sent: <ReceivingStage1>
+0Player Input : [False, False]
+1Player Input : [False, False]
+0Player Input : [False, False]
+1Player Input : [False, False]
+Received: <Stage1Input: PAPER>
+msg = Stage1Input: PAPER
+0Player Input : [True, False]
+1Player Input : [True, False]
+0Player Input : [True, False]
+1Player Input : [True, False]
+0Player Input : [True, False]
+1Player Input : [True, False]
+Received: <Stage1Input: SCISSORS>
+msg = Stage1Input: SCISSORS
+0Player Input : [True, False]
+choi Lose
+Message Sent: <Stage1: Lose>
+1Player Input : [True, True]
+NAM Win
+Message Sent: <Stage1: Win>
+0Player Input : [True, True]
+choi Lose
+Message Sent: <Stage 1 to 2>
+1Player Input : [True, True]
+NAM Win
+Message Sent: <Stage 1 to 2>
+Stage 1 end
+0Player Input : [False, False]
+Message Sent: <NotTurn ReceivingStage2>
+1Player Input : [False, False]
+Message Sent: <Turn ReceivingStage2>
+0Player Input : [False, False]
+1Player Input : [False, False]
+0Player Input : [False, False]
+1Player Input : [False, False]
+Received: <Stage2Input: ROCK>
+0Player Input : [True, False]
+1Player Input : [True, False]
+0Player Input : [True, False]Received: <Stage2Input: PAPER>
+
+1Player Input : [True, True]
+NAM Draw
+Message Sent: <Stage2: Draw>
+0Player Input : [True, True]
+choi Draw
+Message Sent: <Stage2: Draw>
+1Player Input : [False, False]
+Message Sent: <Turn ReceivingStage2>
+0Player Input : [False, False]
+Message Sent: <NotTurn ReceivingStage2>
+1Player Input : [False, False]
+0Player Input : [False, False]
+Received: <Stage2Input: SCISSORS>
+msg = Stage2Input: SCISSORS
+1Player Input : [True, False]
+0Player Input : [True, False]
+1Player Input : [True, False]
+0Player Input : [True, False]
+1Player Input : [True, False]
+Received: <Stage2Input: ROCK>
+0Player Input : [True, False]
+choi Draw
+Message Sent: <Stage2: Draw>
+1Player Input : [True, True]
+NAM Draw
+Message Sent: <Stage2: Draw>
+0Player Input : [False, False]
+Message Sent: <NotTurn ReceivingStage2>
+1Player Input : [False, False]
+Message Sent: <Turn ReceivingStage2>
+0Player Input : [False, False]
+1Player Input : [False, False]
+0Player Input : [False, False]Received: <Stage2Input: ROCK>
+
+1Player Input : [True, False]
+0Player Input : [True, False]
+1Player Input : [True, False]
+0Player Input : [True, False]
+Received: <Stage2Input: ROCK>
+1Player Input : [True, True]
+NAM Win
+Message Sent: <Stage2: Win>
+0Player Input : [True, True]
+choi Lose
+Message Sent: <Stage2: Lose>
+1Player Input : [True, True]
+NAM Win
+Message Sent: <Score: 2 OpponentScore: 1>
+0Player Input : [True, True]
+choi Lose
+Message Sent: <Score: 1 OpponentScore: 2>
+Stage 2 end
+Message Sent: <ReceivingStage1>
+Message Sent: <ReceivingStage1>
+1Player Input : [False, False]
+0Player Input : [False, False]
+1Player Input : [False, False]
+0Player Input : [False, False]
+1Player Input : [False, False]
+0Player Input : [False, False]
+Received: <Stage1Input: PAPER>
+msg = Stage1Input: PAPER
+1Player Input : [True, False]
+0Player Input : [True, False]
+1Player Input : [True, False]
+0Player Input : [True, False]
+Received: <Stage1Input: SCISSORS>
+msg = Stage1Input: SCISSORS
+1Player Input : [True, True]
+NAM Win
+Message Sent: <Stage1: Win>
+0Player Input : [True, True]
+choi Lose
+Message Sent: <Stage1: Lose>
+1Player Input : [True, True]
+NAM Win
+Message Sent: <Stage 1 to 2>
+0Player Input : [True, True]
+choi Lose
+Message Sent: <Stage 1 to 2>
+Stage 1 end
+1Player Input : [False, False]
+Message Sent: <Turn ReceivingStage2>
+0Player Input : [False, False]
+Message Sent: <NotTurn ReceivingStage2>
+1Player Input : [False, False]
+0Player Input : [False, False]Received: <Stage2Input: PAPER>
+
+1Player Input : [False, True]
+0Player Input : [False, True]
+1Player Input : [False, True]Received: <Stage2Input: PAPER>
+
+0Player Input : [True, True]
+choi Lose
+Message Sent: <Stage2: Lose>
+1Player Input : [True, True]
+NAM Win
+Message Sent: <Stage2: Win>
+0Player Input : [True, True]
+choi Lose
+Message Sent: <Final: Lose>
+1Player Input : [True, True]
+NAM Win
+Message Sent: <Final: Win>
+Stage 2 end, Connection over
+0Player Input : [False, False]
+Message Sent: <NotTurn ReceivingStage2>
+1Player Input : [False, False]
+Message Sent: <Turn ReceivingStage2>
+0Player Input : [False, False]
+1Player Input : [False, False]
