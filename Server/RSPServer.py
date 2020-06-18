@@ -6,7 +6,7 @@ import time
 import threading
 from ServerConnectionManager import *
 
-HOST = ''
+HOST = '127.30.1.10'
 PORT = 12000
 TIMEOUT = 30
 WINNINGSCORE = 3
